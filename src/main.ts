@@ -61,12 +61,7 @@ export async function run(): Promise<void> {
     testsExecuted = true
     await vstest.runTests(vsTestPath, testAssemblies, testAdapterPath, args)
   } catch (error) {
-    // Fail the workflow run if an error occurs
-    if (error instanceof Error) {
-      core.setFailed(error.message)
-    } else {
-      core.setFailed('An unknown error occured.')
-    }
+    core.setFailed(error.message)
   }
 
   try {
@@ -78,11 +73,6 @@ export async function run(): Promise<void> {
       )
     }
   } catch (error) {
-    // Fail the workflow run if an error occurs
-    if (error instanceof Error) {
-      core.setFailed(error.message)
-    } else {
-      core.setFailed('An unknown error occured.')
-    }
+    core.setFailed(error.message)
   }
 }
