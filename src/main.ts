@@ -1,15 +1,14 @@
 import * as core from '@actions/core'
 import * as path from 'path'
+import * as artifact from './artifact'
 import * as vstest from './vstest'
-import { getActionInputs } from './inputs'
-import { uploadArtifact } from './__reference__/uploadArtifact'
+import { Default, getActionInputs } from './inputs'
 
 export async function run(): Promise<void> {
   let testsExecuted = false
+  const inputs = getActionInputs()
 
   try {
-    const inputs = getActionInputs()
-
     const testAssemblies = await vstest.getTestAssemblies(inputs)
     if (testAssemblies.length === 0) {
       throw new Error('No test assemblies found.')
@@ -72,7 +71,11 @@ export async function run(): Promise<void> {
 
   try {
     if (testsExecuted) {
-      await uploadArtifact()
+      await artifact.uploadArtifact(
+        inputs.artifactName ?? Default.artifactName,
+        'TestResults',
+        inputs.artifactRetentionDays
+      )
     }
   } catch (error) {
     // Fail the workflow run if an error occurs

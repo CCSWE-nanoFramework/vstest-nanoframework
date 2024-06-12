@@ -85,4 +85,5 @@ jobs:
         with:
           solutionFolder: ${{ env.SOLUTION_FOLDER }}
           runSettings: ${{ env.SOLUTION_FOLDER }}NFUnitTest1/nano.runsettings
-          ifNoFilesFound: 'warn'
+          artifactName: 'non-default-artifact-name'
+          artifactRetentionDays: 1
