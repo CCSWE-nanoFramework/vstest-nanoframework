@@ -17,7 +17,7 @@ namespace NFUnitTest1
         public void Test_should_fail()
         {
             //Assert.SkipTest();
-            Assert.IsFalse(TestClass.DoesTestPass(false));
+            Assert.IsFalse(TestClass.DoesTestPass(true));
         }
     }
 }
