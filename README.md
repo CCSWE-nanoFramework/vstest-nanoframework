@@ -32,8 +32,8 @@ the console logs of the action and attached as an artifact.
 ```yaml
 - uses: CCSWE-nanoFramework/vstest-nanoframework@v1
   with:
-    solutionFolder: '\src'
-    runSettings: \src\NFUnitTest1\nano.runsettings
+    solutionFolder: '.\src'
+    runSettings: '.\src\NFUnitTest1\nano.runsettings'
     artifactName: 'unit_test_results'
     artifactRetentionDays: 7
 ```
