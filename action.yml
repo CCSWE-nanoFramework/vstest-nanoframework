@@ -1,0 +1,75 @@
+name: 'nanotest'
+description: 'Run VSTest and upload result logs'
+author: 'CCSWE'
+
+branding:
+  icon: 'code'
+  color: 'blue'
+
+# Define your inputs here.
+inputs:
+  testAssemblies:
+    description: 'Run tests from the specified files'
+    required: true
+    default: '**\\bin\\**\\NFUnitTest.dll'
+
+  solutionFolder:
+    description: 'Folder to search for the test assemblies and test adapter'
+    required: true
+    default: '.\\'
+
+  testAdapter:
+    description: 'Run tests using the specified test adapter'
+    required: true
+    default: '**\\packages\\**\\nanoFramework.TestAdapter.dll'
+
+  runSettings:
+    description:
+      'Path to runsettings or testsettings file to use with the tests'
+    required: false
+
+  runInParallel:
+    description:
+      'If set, tests will run in parallel leveraging available cores of the
+      machine. This will override the MaxCpuCount if specified in your
+      runsettings file. Valid values are: `true` and `false`'
+    required: false
+    default: 'false'
+
+  runInIsolation:
+    description:
+      'Runs the tests in an isolated process. This makes vstest.console.exe
+      process less likely to be stopped on an error in the tests, but tests
+      might run slower. Valid values are: `true` and `false`'
+    required: false
+    default: 'false'
+
+  enableCodeCoverage:
+    description: 'Collect code coverage information from the test run'
+    required: false
+    default: 'false'
+
+  otherConsoleOptions:
+    description: 'Other options that can be passed to vstest.console.exe'
+    required: false
+
+  platform:
+    description:
+      'Build platform against which the tests should be reported. Valid values
+      are: `x86`, `x64`, and `ARM`'
+    required: false
+
+  artifactName:
+    description: 'Test result artifact name'
+    required: true
+    default: 'vstest-results'
+
+  artifactRetentionDays:
+    description: >
+      Duration after which artifact will expire in days. 0 means using default
+      retention. Minimum 1 day. Maximum 90 days unless changed from the
+      repository settings page.
+
+runs:
+  using: node20
+  main: dist/index.js

@@ -1,0 +1,89 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  test-typescript:
+    name: TypeScript Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        id: setup-node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Install Dependencies
+        id: npm-ci
+        run: npm ci
+
+      - name: Check Format
+        id: npm-format-check
+        run: npm run format:check
+
+      - name: Lint
+        id: npm-lint
+        run: npm run lint
+
+      - name: Test
+        id: npm-ci-test
+        run: npm run ci-test
+
+  test-action:
+    name: GitHub Actions Test
+    runs-on: windows-latest
+    env:
+      BUILD_CONFIGURATION: 'Release'
+      GITHUB_TOKEN: ${{ github.token }}
+      SOLUTION_FOLDER: './solution/'
+      SOLUTION: 'VsTestAction.sln'
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup nanoFramework
+        uses: nanoframework/nanobuild@v1
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+        with:
+          msbuild-architecture: x64
+
+      - name: Setup NuGet
+        uses: nuget/setup-nuget@v2
+
+      - name: Install dependencies
+        run: nuget restore ${{ env.SOLUTION_FOLDER }}${{ env.SOLUTION }}
+
+      - name: Build solution
+        run:
+          msbuild ${{ env.SOLUTION_FOLDER }}${{ env.SOLUTION }}
+          /p:Configuration=${{ env.BUILD_CONFIGURATION }}
+
+      - name: Test Local Action
+        id: test-action
+        uses: ./
+        with:
+          solutionFolder: ${{ env.SOLUTION_FOLDER }}
+          runSettings: ${{ env.SOLUTION_FOLDER }}NFUnitTest1/nano.runsettings
+          artifactName: 'non-default-artifact-name'
+          artifactRetentionDays: 1
