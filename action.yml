@@ -1,8 +1,7 @@
-name: 'nanoframework-vstest'
+name: 'nanotest'
 description: 'Run VSTest and upload result logs'
 author: 'CCSWE'
 
-# Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
   icon: 'code'
   color: 'blue'
@@ -51,8 +50,7 @@ inputs:
     default: 'false'
 
   otherConsoleOptions:
-    description:
-      'Other console options that can be passed to vstest.console.exe'
+    description: 'Other options that can be passed to vstest.console.exe'
     required: false
 
   platform:
@@ -61,30 +59,16 @@ inputs:
       are: `x86`, `x64`, and `ARM`'
     required: false
 
-  resultLogsArtifactName:
-    description: 'Test result logs artifact name'
+  artifactName:
+    description: 'Test result artifact name'
     required: true
-    default: 'vs-test-result-logs'
+    default: 'vstest-results'
 
-  ifNoFilesFound:
-    description: >
-      The desired behavior if no files are found using the provided path.
-      Available Options:
-        warn: Output a warning but do not fail the action
-        error: Fail the action with an error message
-        ignore: Do not output any warnings or errors, the action does not fail
-    default: 'warn'
-
-  retentionDays:
+  artifactRetentionDays:
     description: >
       Duration after which artifact will expire in days. 0 means using default
       retention. Minimum 1 day. Maximum 90 days unless changed from the
       repository settings page.
-
-# Define your outputs here.
-#outputs:
-#  time:
-#    description: 'Your output description here'
 
 runs:
   using: node20
