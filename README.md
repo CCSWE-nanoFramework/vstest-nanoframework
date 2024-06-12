@@ -30,7 +30,7 @@ the console logs of the action and attached as an artifact.
 ## Example usage
 
 ```yaml
-- uses: CCSWE-nanoFramework/nanotest@v1
+- uses: CCSWE-nanoFramework/vstest-nanoframework@v1
   with:
     solutionFolder: '\src'
     runSettings: \src\NFUnitTest1\nano.runsettings
