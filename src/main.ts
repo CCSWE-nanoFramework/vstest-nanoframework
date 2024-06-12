@@ -30,7 +30,7 @@ export async function run(): Promise<void> {
     } else if (testAdapters.length > 1) {
       core.warning('Multiple test adapters found')
       for (const testAdapter of testAdapters) {
-        core.info(`${testAdapter}`)
+        core.warning(`${testAdapter}`)
       }
     }
 
@@ -44,7 +44,7 @@ export async function run(): Promise<void> {
       } else if (runSettings.length > 1) {
         core.warning('Multiple run settings found')
         for (const runSetting of runSettings) {
-          core.info(`${runSetting}`)
+          core.warning(`${runSetting}`)
         }
       }
 
