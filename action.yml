@@ -1,5 +1,5 @@
-name: 'nanotest'
-description: 'Run VSTest and upload result logs'
+name: 'vstest-nanoframework'
+description: 'Runs VSTest and upload result logs'
 author: 'CCSWE'
 
 branding:

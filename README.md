@@ -1,4 +1,4 @@
-# nanotest
+# vstest-nanoframework
 
 This action is a rewrite of the
 [vstest-action](https://github.com/microsoft/vstest-action) provided by
