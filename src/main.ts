@@ -51,8 +51,12 @@ export async function run(): Promise<void> {
       inputs.runSettings = runSettings[0]
     }
 
-    const vsTestPath = await vstest.downloadTestTools()
-    core.debug(`${vsTestPath}`)
+    let vsTestPath = await vstest.getVsTestPath()
+    if (!vsTestPath) {
+      vsTestPath = await vstest.downloadTestTools()
+    }
+
+    core.info(`${vsTestPath}`)
 
     const args = vstest.getTestArguments(inputs)
     core.debug(`Arguments: ${args}`)
