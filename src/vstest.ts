@@ -101,6 +101,15 @@ export async function getTestAssemblies(inputs: Inputs): Promise<string[]> {
   return testAssemblies.files
 }
 
+export async function getVsTestPath(): Promise<string> {
+  // TODO: Don't hardcode a specific version but glob on that as well and find the highest
+  const vsTestFindResult = await find(
+    'C:\\Program Files\\Microsoft Visual Studio\\2022\\*\\Common7\\IDE\\CommonExtensions\\Microsoft\\TestWindow\\vstest.console.exe'
+  )
+
+  return vsTestFindResult.files.length > 0 ? vsTestFindResult.files[0] : ''
+}
+
 // TODO: This should move somewhere else
 function isValidPlatform(platform?: string): boolean {
   if (!platform) {
