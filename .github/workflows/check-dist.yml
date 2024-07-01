@@ -15,7 +15,7 @@ on:
       - master
   push:
     branches:
-      - mast
+      - master
 
 permissions:
   contents: read
