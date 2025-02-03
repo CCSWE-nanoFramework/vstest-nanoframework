@@ -7,7 +7,7 @@ import * as win32 from 'path/win32'
 const solutionFolder = path.join(__dirname, './__solution__')
 const packageFolder = path.join(
   solutionFolder,
-  'packages/nanoFramework.TestFramework.2.1.100'
+  'packages/nanoFramework.TestFramework.3.0.57'
 )
 const testAdapter = path.join(
   packageFolder,
@@ -17,7 +17,7 @@ const testAdapter = path.join(
 describe('find()', () => {
   it('finds directory', async () => {
     const results = await sut.find(
-      path.join(solutionFolder, '**\\nanoFramework.TestFramework.2.1.100\\')
+      path.join(solutionFolder, '**\\nanoFramework.TestFramework.*\\')
     )
 
     expect(results.directories.length).toBeGreaterThan(0)
