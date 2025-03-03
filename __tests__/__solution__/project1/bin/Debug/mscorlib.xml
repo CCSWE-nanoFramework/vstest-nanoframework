@@ -164,6 +164,494 @@
             <exception cref="T:System.ArgumentNullException"><paramref name="argument"/> is null.</exception>
             <exception cref="T:System.ArgumentException"><paramref name="argument"/> is empty.</exception>
         </member>
+        <member name="T:System.Diagnostics.NativeProfiledAttribute">
+            <summary>
+            Indicates that a method will profiled by the runtime, providing it has profiling capabilities enabled.
+            </summary>
+            <remarks>
+            This attribute is exclusive to the .NET nanoFramework runtime and has no effect on other runtimes.
+            </remarks>
+        </member>
+        <member name="T:System.Diagnostics.ConditionalAttribute">
+            <summary>
+            Indicates to compilers that a method call or attribute should be ignored unless a specified conditional compilation symbol is defined.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ConditionalAttribute.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the ConditionalAttribute class.
+            </summary>
+            <param name="conditionString">A string that specifies the case-sensitive conditional compilation symbol that is associated with the attribute.</param>
+        </member>
+        <member name="P:System.Diagnostics.ConditionalAttribute.ConditionString">
+            <summary>
+            Gets the conditional compilation symbol that is associated with the ConditionalAttribute attribute.
+            </summary>
+            <value>A string that specifies the case-sensitive conditional compilation symbol that is associated with the ConditionalAttribute attribute.</value>
+        </member>
+        <member name="T:System.Diagnostics.Debug">
+            <summary>
+            Provides a set of methods and properties that help debug your code.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.Debug.Assert(System.Boolean)">
+            <summary>
+            Causes a break in execution if the specified assertion (condition) evaluates to false.
+            </summary>
+            <param name="condition">The condition to be evaluated. If the value is false, program execution stops.</param>
+        </member>
+        <member name="M:System.Diagnostics.Debug.Assert(System.Boolean,System.String)">
+            <summary>
+            Causes a break in execution if the specified assertion (condition) evaluates to false.
+            </summary>
+            <param name="condition">The condition to be evaluated. If the value is false, program execution stops.</param>
+            <param name="message">The text to be output if the assertion is false.</param>
+        </member>
+        <member name="M:System.Diagnostics.Debug.Assert(System.Boolean,System.String,System.String)">
+            <summary>
+            Causes a break in execution if the specified assertion (condition) evaluates to false.
+            </summary>
+            <param name="condition">The condition to be evaluated. If the value is false, program execution stops.</param>
+            <param name="message">The text to be output if the assertion is false.</param>
+            <param name="detailedMessage">The detailed message to be displayed if the assertion is false.</param>
+        </member>
+        <member name="M:System.Diagnostics.Debug.Write(System.String)">
+            <summary>
+            Writes a message to the trace listeners in the Listeners collection.
+            </summary>
+            <param name="message">A message to write.</param>
+            <remarks>
+            In .NET nanoFramework implementation the message is output to Visual Studio debugger window.
+            </remarks>
+        </member>
+        <member name="M:System.Diagnostics.Debug.WriteLine">
+            <summary>
+            Writes the current line terminator to the standard output stream.
+            </summary>
+            <remarks>
+            In .NET nanoFramework implementation the message is output to Visual Studio debugger window.
+            </remarks>
+        </member>
+        <member name="M:System.Diagnostics.Debug.WriteLine(System.String)">
+            <summary>
+            Writes a message followed by a line terminator to the trace listeners in the Listeners collection.
+            </summary>
+            <param name="message">A message to write.</param>
+            <remarks>
+            In .NET nanoFramework implementation the message is output to Visual Studio debugger window.
+            </remarks>
+        </member>
+        <member name="T:System.Diagnostics.Debugger">
+            <summary>
+            Enables communication with a debugger. This class cannot be inherited.
+            </summary>
+        </member>
+        <member name="P:System.Diagnostics.Debugger.IsAttached">
+            <summary>
+            Gets a value that indicates whether a debugger is attached to the process.
+            </summary>
+            <value>true if a debugger is attached; otherwise, false.</value>
+        </member>
+        <member name="M:System.Diagnostics.Debugger.Break">
+            <summary>
+            Signals a breakpoint to an attached debugger.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.DebuggerStepThroughAttribute">
+            <summary>
+            Identifies a type or member that is not part of the user code for an application.
+            </summary>
+            <remarks>
+            Designer provided types and members that are not part of the code specifically created by the user can complicate the debugging experience. This attribute suppresses the display of these adjunct types and members in the debugger window and automatically steps through, rather than into, designer provided code. When the debugger encounters this attribute when stepping through user code, the user experience is to not see the designer provided code and to step to the next user-supplied code statement.
+            The debugger behaviour when the <see cref="T:System.Diagnostics.DebuggerNonUserCodeAttribute"/> is present is similar to using a combination of the <see cref="T:System.Diagnostics.DebuggerHiddenAttribute"/> attribute, which hides the code from the debugger, and the <see cref="T:System.Diagnostics.DebuggerStepThroughAttribute"/> attribute, which tells the debugger to step through, rather than into, the code it is applied to.
+            </remarks>
+        </member>
+        <member name="M:System.Diagnostics.DebuggerStepThroughAttribute.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.DebuggerNonUserCodeAttribute"/> class.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.DebuggerStepperBoundaryAttribute">
+            <summary>
+            Indicates the code following the attribute is to be executed in run, not step, mode.
+            </summary>
+            <remarks>
+            The <see cref="T:System.Diagnostics.DebuggerStepperBoundaryAttribute"/> attribute is used as an escape from the effect of a <see cref="T:System.Diagnostics.DebuggerNonUserCodeAttribute"/>. When executing within the boundaries of the <see cref="T:System.Diagnostics.DebuggerNonUserCodeAttribute"/>, designer-provided code is executed as a step-through until the next user supplied code is encountered. When context switches are made on a thread, the next user-supplied code module stepped into may not relate to the code that was in the process of being debugged. To avoid this debugging experience, use the <see cref="T:System.Diagnostics.DebuggerStepperBoundaryAttribute"/> to escape from stepping through code to running code. For example, in Visual Studio 2005, encountering a <see cref="T:System.Diagnostics.DebuggerStepperBoundaryAttribute"/> while stepping through code using the F10 key (or Step Over command) has the same effect as pressing the F5 key or using the Start Debugging command.
+            </remarks>
+        </member>
+        <member name="M:System.Diagnostics.DebuggerStepperBoundaryAttribute.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.DebuggerStepperBoundaryAttribute"/> class.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.DebuggerHiddenAttribute">
+            <summary>
+            Specifies the DebuggerHiddenAttribute. This class cannot be inherited.
+            </summary>
+            <remarks>
+            The common language runtime attaches no semantics to this attribute. It is provided for use by source code debuggers. For example, the Visual Studio 2005 debugger does not stop in a method marked with this attribute and does not allow a breakpoint to be set in the method. Other debugger attributes recognized by the Visual Studio 2005 debugger are the <see cref="T:System.Diagnostics.DebuggerNonUserCodeAttribute"/> and the <see cref="T:System.Diagnostics.DebuggerStepThroughAttribute"/>. 
+            </remarks>
+        </member>
+        <member name="M:System.Diagnostics.DebuggerHiddenAttribute.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.DebuggerHiddenAttribute"/> class.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.DebuggerNonUserCodeAttribute">
+            <summary>
+            Identifies a type or member that is not part of the user code for an application.
+            </summary>
+            <remarks>
+            Designer provided types and members that are not part of the code specifically created by the user can complicate the debugging experience. This attribute suppresses the display of these adjunct types and members in the debugger window and automatically steps through, rather than into, designer provided code. When the debugger encounters this attribute when stepping through user code, the user experience is to not see the designer provided code and to step to the next user-supplied code statement. 
+            The debugger behaviour when the <see cref="T:System.Diagnostics.DebuggerNonUserCodeAttribute"/> is present is similar to using a combination of the <see cref="T:System.Diagnostics.DebuggerHiddenAttribute"/> attribute, which hides the code from the debugger, and the <see cref="T:System.Diagnostics.DebuggerStepThroughAttribute"/> attribute, which tells the debugger to step through, rather than into, the code it is applied to.
+            </remarks>
+        </member>
+        <member name="M:System.Diagnostics.DebuggerNonUserCodeAttribute.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.DebuggerNonUserCodeAttribute"/> class.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.DebuggableAttribute">
+            <summary>
+            Modifies code generation for runtime just-in-time (JIT) debugging. This class cannot be inherited.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.DebuggableAttribute.DebuggingModes">
+            <summary>
+            Specifies the debugging mode for the just-in-time (JIT) compiler.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.DebuggableAttribute.DebuggingModes.None">
+            <summary>
+            Starting with the .NET Framework version 2.0, JIT tracking information is always generated, and this flag has the same effect as Default,
+            except that it sets the DebuggableAttribute.IsJITTrackingEnabled property to false. However, because JIT tracking is always enabled, 
+            the property value is ignored in version 2.0 or later.
+            Note that, unlike the None flag, the None flag cannot be used to disable JIT optimizations.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.DebuggableAttribute.DebuggingModes.Default">
+            <summary>
+            Instructs the just-in-time (JIT) compiler to use its default behaviour, which includes enabling optimizations, disabling Edit and Continue support,
+            and using symbol store sequence points if present. Starting with the .NET Framework version 2.0, JIT tracking information, the Microsoft intermediate
+            language (MSIL) offset to the native-code offset within a method, is always generated.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.DebuggableAttribute.DebuggingModes.DisableOptimizations">
+            <summary>
+            Disable optimizations performed by the compiler to make your output file smaller, faster, and more efficient. Optimizations result in code rearrangement
+            in the output file, which can make debugging difficult. Typically optimization should be disabled while debugging. In versions 2.0 or later, combine this
+            value with Default (Default | DisableOptimizations) to enable JIT tracking and disable optimizations.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints">
+            <summary>
+            Use the implicit MSIL sequence points, not the program database (PDB) sequence points. The symbolic information normally includes at least one 
+            Microsoft intermediate language (MSIL) offset for each source line. When the just-in-time (JIT) compiler is about to compile a method, it asks 
+            the profiling services for a list of MSIL offsets that should be preserved. These MSIL offsets are called sequence points.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.DebuggableAttribute.DebuggingModes.EnableEditAndContinue">
+            <summary>
+            Enable edit and continue. Edit and continue enables you to make changes to your source code while your program is in break mode. The ability to edit and continue is compiler dependent.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.DebuggableAttribute.#ctor(System.Boolean,System.Boolean)">
+            <summary>
+            Initializes a new instance of the DebuggableAttribute class, using the specified tracking and optimization options for the just-in-time (JIT) compiler.
+            </summary>
+            <param name="isJITTrackingEnabled">true to enable debugging; otherwise, false.</param>
+            <param name="isJITOptimizerDisabled">true to disable the optimizer for execution; otherwise, false.</param>
+        </member>
+        <member name="M:System.Diagnostics.DebuggableAttribute.#ctor(System.Diagnostics.DebuggableAttribute.DebuggingModes)">
+            <summary>
+            Initializes a new instance of the DebuggableAttribute class, using the specified debugging modes for the just-in-time (JIT) compiler.
+            </summary>
+            <param name="modes">A bitwise combination of the DebuggableAttribute.DebuggingModes values specifying the debugging mode for the JIT compiler.</param>
+        </member>
+        <member name="P:System.Diagnostics.DebuggableAttribute.IsJITTrackingEnabled">
+            <summary>
+            Gets a value that indicates whether the runtime will track information during code generation for the debugger.
+            </summary>
+            <value>true if the runtime will track information during code generation for the debugger; otherwise, false.</value>
+        </member>
+        <member name="P:System.Diagnostics.DebuggableAttribute.IsJITOptimizerDisabled">
+            <summary>
+            Gets a value that indicates whether the runtime optimizer is disabled.
+            </summary>
+            <value>true if the runtime optimizer is disabled; otherwise, false.</value>
+        </member>
+        <member name="P:System.Diagnostics.DebuggableAttribute.DebuggingFlags">
+            <summary>
+            Gets the debugging modes for the attribute.
+            </summary>
+            <value>A bitwise combination of the DebuggableAttribute.DebuggingModes values describing the debugging mode for the just-in-time (JIT) compiler. The default is Default.</value>
+        </member>
+        <member name="T:System.Diagnostics.DebuggerBrowsableState">
+            <summary>
+            Provides display instructions for the debugger.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.DebuggerBrowsableState.Never">
+            <summary>
+            Never show the element.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.DebuggerBrowsableState.Collapsed">
+            <summary>
+            Show the element as collapsed.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.DebuggerBrowsableState.RootHidden">
+            <summary>
+            Do not display the root element; display the child elements if the element is a collection or array of items.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.DebuggerBrowsableAttribute">
+            <summary>
+            Determines if and how a member is displayed in the debugger variable windows. This class cannot be inherited.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.DebuggerBrowsableAttribute.#ctor(System.Diagnostics.DebuggerBrowsableState)">
+            <summary>
+            Initializes a new instance of the DebuggerBrowsableAttribute class.
+            </summary>
+            <param name="state">One of the DebuggerBrowsableState values that specifies how to display the member.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException"></exception>
+        </member>
+        <member name="P:System.Diagnostics.DebuggerBrowsableAttribute.State">
+            <summary>
+            Gets the display state for the attribute.
+            </summary>
+            <value>One of the DebuggerBrowsableState values.</value>
+        </member>
+        <member name="T:System.Diagnostics.DebuggerTypeProxyAttribute">
+            <summary>
+            Specifies the display proxy for a type.
+            </summary>
+            <remarks>Available only in mscorlib build with support for System.Reflection.</remarks>
+        </member>
+        <member name="M:System.Diagnostics.DebuggerTypeProxyAttribute.#ctor(System.Type)">
+            <summary>
+            Initializes a new instance of the DebuggerTypeProxyAttribute class using the type of the proxy.
+            </summary>
+            <param name="type">The proxy type.</param>
+            <exception cref="T:System.ArgumentNullException"></exception>
+        </member>
+        <member name="M:System.Diagnostics.DebuggerTypeProxyAttribute.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the DebuggerTypeProxyAttribute class using the type name of the proxy.
+            </summary>
+            <param name="typeName">The type name of the proxy type.</param>
+        </member>
+        <member name="P:System.Diagnostics.DebuggerTypeProxyAttribute.ProxyTypeName">
+            <summary>
+            Gets the type name of the proxy type.
+            </summary>
+            <value>The type name of the proxy type.</value>
+        </member>
+        <member name="P:System.Diagnostics.DebuggerTypeProxyAttribute.Target">
+            <summary>
+            Gets or sets the target type for the attribute.
+            </summary>
+            <value>The target type for the attribute.</value>
+            <exception cref="T:System.ArgumentNullException">Target is set to null.</exception>
+        </member>
+        <member name="P:System.Diagnostics.DebuggerTypeProxyAttribute.TargetTypeName">
+            <summary>
+            Gets or sets the name of the target type.
+            </summary>
+            <value>
+            The name of the target type.
+            </value>
+        </member>
+        <member name="T:System.Diagnostics.DebuggerDisplayAttribute">
+            <summary>
+            Determines how a class or field is displayed in the debugger variable windows.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.DebuggerDisplayAttribute.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the DebuggerDisplayAttribute class.
+            </summary>
+            <param name="value">The string to be displayed in the value column for instances of the type; an empty string ("") causes the value column to be hidden.</param>
+        </member>
+        <member name="P:System.Diagnostics.DebuggerDisplayAttribute.Value">
+            <summary>
+            Gets the string to display in the value column of the debugger variable windows.
+            </summary>
+            <value>The string to display in the value column of the debugger variable.</value>
+        </member>
+        <member name="P:System.Diagnostics.DebuggerDisplayAttribute.Name">
+            <summary>
+            Gets or sets the name to display in the debugger variable windows.
+            </summary>
+            <value>The name to display in the debugger variable windows.</value>
+        </member>
+        <member name="P:System.Diagnostics.DebuggerDisplayAttribute.Type">
+            <summary>
+            Gets or sets the string to display in the type column of the debugger variable windows.
+            </summary>
+            <value>The string to display in the type column of the debugger variable windows.</value>
+        </member>
+        <member name="P:System.Diagnostics.DebuggerDisplayAttribute.Target">
+            <summary>
+            Gets or sets the type of the attribute's target.
+            </summary>
+            <value>The attribute's target type.</value>
+            <exception cref="T:System.ArgumentNullException">value</exception>
+        </member>
+        <member name="P:System.Diagnostics.DebuggerDisplayAttribute.TargetTypeName">
+            <summary>
+            Gets or sets the type name of the attribute's target.
+            </summary>
+            <value>The name of the attribute's target type.</value>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.AllowNullAttribute">
+            <summary>
+            Specifies that <see langword="null"/> is allowed as an input even if the corresponding type disallows it.
+            </summary>
+            <remarks>
+            To override a method that has a parameter annotated with this attribute, use the ? operator. For more information, see Nullable static analysis in the C# guide.
+            </remarks>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.DisallowNullAttribute">
+            <summary>
+            Specifies that null is disallowed as an input even if the corresponding type allows it.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.MaybeNullAttribute">
+            <summary>
+            Specifies that an output may be null even if the corresponding type disallows it.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.NotNullAttribute">
+            <summary>
+            Specifies that an output will not be null even if the corresponding type allows it. Specifies that an input argument was not null when the call returns.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute">
+            <summary>
+            Specifies that when a method returns <see cref="P:System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.ReturnValue"/>, the parameter may be null even if the corresponding type disallows it.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.#ctor(System.Boolean)">
+            <summary>
+            Initializes the attribute with the specified return value condition.
+            </summary>
+            <param name="returnValue">
+            The return value condition. If the method returns this value, the associated parameter may be null.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.ReturnValue">
+            <summary>
+            Gets the return value condition.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute">
+            <summary>
+            Specifies that when a method returns <see cref="P:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute.ReturnValue"/>, the parameter will not be null even if the corresponding type allows it.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute.#ctor(System.Boolean)">
+            <summary>Initializes the attribute with the specified return value condition.</summary>
+            <param name="returnValue">
+            The return value condition. If the method returns this value, the associated parameter will not be null.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute.ReturnValue">
+            <summary>Gets the return value condition.</summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute">
+            <summary>
+            Specifies that the output will be non-null if the named parameter is non-null.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute.#ctor(System.String)">
+            <summary>Initializes the attribute with the associated parameter name.</summary>
+            <param name="parameterName">
+            The associated parameter name.  The output will be non-null if the argument to the parameter specified is non-null.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute.ParameterName">
+            <summary>Gets the associated parameter name.</summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute">
+            <summary>
+            Applied to a method that will never return under any circumstance.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute">
+            <summary>
+            Specifies that the method will not return if the associated Boolean parameter is passed the specified value.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute.#ctor(System.Boolean)">
+            <summary>Initializes the attribute with the specified parameter value.</summary>
+            <param name="parameterValue">
+            The condition parameter value. Code after the method will be considered unreachable by diagnostics if the argument to
+            the associated parameter matches this value.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute.ParameterValue">
+            <summary>
+            Gets the condition parameter value.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.MemberNotNullAttribute">
+            <summary>
+            Specifies that the method or property will ensure that the listed field and property members have not-null values.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.MemberNotNullAttribute.#ctor(System.String)">
+            <summary>Initializes the attribute with a field or property member.</summary>
+            <param name="member">
+            The field or property member that is promised to be not-null.
+            </param>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.MemberNotNullAttribute.#ctor(System.String[])">
+            <summary>Initializes the attribute with the list of field and property members.</summary>
+            <param name="members">
+            The list of field and property members that are promised to be not-null.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.MemberNotNullAttribute.Members">
+            <summary>
+            Gets field or property member names.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute">
+            <summary>
+            Specifies that the method or property will ensure that the listed field and property members have not-null values when returning with the specified return value condition.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute.#ctor(System.Boolean,System.String)">
+            <summary>Initializes the attribute with the specified return value condition and a field or property member.</summary>
+            <param name="returnValue">
+            The return value condition. If the method returns this value, the associated parameter will not be null.
+            </param>
+            <param name="member">
+            The field or property member that is promised to be not-null.
+            </param>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute.#ctor(System.Boolean,System.String[])">
+            <summary>Initializes the attribute with the specified return value condition and list of field and property members.</summary>
+            <param name="returnValue">
+            The return value condition. If the method returns this value, the associated parameter will not be null.
+            </param>
+            <param name="members">
+            The list of field and property members that are promised to be not-null.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute.ReturnValue">
+            <summary>
+            Gets the return value condition.
+            </summary>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute.Members">
+            <summary>
+            Gets field or property member names.
+            </summary>
+        </member>
         <member name="T:System.PlatformNotSupportedException">
             <summary>
             The exception that is thrown when a feature does not run on a particular platform.
@@ -2233,486 +2721,6 @@
             <param name="d2">The second delegate to compare. </param>
             <returns>true if d1 is not equal to d2; otherwise, false.</returns>
         </member>
-        <member name="T:System.Diagnostics.ConditionalAttribute">
-            <summary>
-            Indicates to compilers that a method call or attribute should be ignored unless a specified conditional compilation symbol is defined.
-            </summary>
-        </member>
-        <member name="M:System.Diagnostics.ConditionalAttribute.#ctor(System.String)">
-            <summary>
-            Initializes a new instance of the ConditionalAttribute class.
-            </summary>
-            <param name="conditionString">A string that specifies the case-sensitive conditional compilation symbol that is associated with the attribute.</param>
-        </member>
-        <member name="P:System.Diagnostics.ConditionalAttribute.ConditionString">
-            <summary>
-            Gets the conditional compilation symbol that is associated with the ConditionalAttribute attribute.
-            </summary>
-            <value>A string that specifies the case-sensitive conditional compilation symbol that is associated with the ConditionalAttribute attribute.</value>
-        </member>
-        <member name="T:System.Diagnostics.Debug">
-            <summary>
-            Provides a set of methods and properties that help debug your code.
-            </summary>
-        </member>
-        <member name="M:System.Diagnostics.Debug.Assert(System.Boolean)">
-            <summary>
-            Causes a break in execution if the specified assertion (condition) evaluates to false.
-            </summary>
-            <param name="condition">The condition to be evaluated. If the value is false, program execution stops.</param>
-        </member>
-        <member name="M:System.Diagnostics.Debug.Assert(System.Boolean,System.String)">
-            <summary>
-            Causes a break in execution if the specified assertion (condition) evaluates to false.
-            </summary>
-            <param name="condition">The condition to be evaluated. If the value is false, program execution stops.</param>
-            <param name="message">The text to be output if the assertion is false.</param>
-        </member>
-        <member name="M:System.Diagnostics.Debug.Assert(System.Boolean,System.String,System.String)">
-            <summary>
-            Causes a break in execution if the specified assertion (condition) evaluates to false.
-            </summary>
-            <param name="condition">The condition to be evaluated. If the value is false, program execution stops.</param>
-            <param name="message">The text to be output if the assertion is false.</param>
-            <param name="detailedMessage">The detailed message to be displayed if the assertion is false.</param>
-        </member>
-        <member name="M:System.Diagnostics.Debug.Write(System.String)">
-            <summary>
-            Writes a message to the trace listeners in the Listeners collection.
-            </summary>
-            <param name="message">A message to write.</param>
-            <remarks>
-            In .NET nanoFramework implementation the message is output to Visual Studio debugger window.
-            </remarks>
-        </member>
-        <member name="M:System.Diagnostics.Debug.WriteLine">
-            <summary>
-            Writes the current line terminator to the standard output stream.
-            </summary>
-            <remarks>
-            In .NET nanoFramework implementation the message is output to Visual Studio debugger window.
-            </remarks>
-        </member>
-        <member name="M:System.Diagnostics.Debug.WriteLine(System.String)">
-            <summary>
-            Writes a message followed by a line terminator to the trace listeners in the Listeners collection.
-            </summary>
-            <param name="message">A message to write.</param>
-            <remarks>
-            In .NET nanoFramework implementation the message is output to Visual Studio debugger window.
-            </remarks>
-        </member>
-        <member name="T:System.Diagnostics.Debugger">
-            <summary>
-            Enables communication with a debugger. This class cannot be inherited.
-            </summary>
-        </member>
-        <member name="P:System.Diagnostics.Debugger.IsAttached">
-            <summary>
-            Gets a value that indicates whether a debugger is attached to the process.
-            </summary>
-            <value>true if a debugger is attached; otherwise, false.</value>
-        </member>
-        <member name="M:System.Diagnostics.Debugger.Break">
-            <summary>
-            Signals a breakpoint to an attached debugger.
-            </summary>
-        </member>
-        <member name="T:System.Diagnostics.DebuggerStepThroughAttribute">
-            <summary>
-            Identifies a type or member that is not part of the user code for an application.
-            </summary>
-            <remarks>
-            Designer provided types and members that are not part of the code specifically created by the user can complicate the debugging experience. This attribute suppresses the display of these adjunct types and members in the debugger window and automatically steps through, rather than into, designer provided code. When the debugger encounters this attribute when stepping through user code, the user experience is to not see the designer provided code and to step to the next user-supplied code statement.
-            The debugger behaviour when the <see cref="T:System.Diagnostics.DebuggerNonUserCodeAttribute"/> is present is similar to using a combination of the <see cref="T:System.Diagnostics.DebuggerHiddenAttribute"/> attribute, which hides the code from the debugger, and the <see cref="T:System.Diagnostics.DebuggerStepThroughAttribute"/> attribute, which tells the debugger to step through, rather than into, the code it is applied to.
-            </remarks>
-        </member>
-        <member name="M:System.Diagnostics.DebuggerStepThroughAttribute.#ctor">
-            <summary>
-            Initializes a new instance of the <see cref="T:System.Diagnostics.DebuggerNonUserCodeAttribute"/> class.
-            </summary>
-        </member>
-        <member name="T:System.Diagnostics.DebuggerStepperBoundaryAttribute">
-            <summary>
-            Indicates the code following the attribute is to be executed in run, not step, mode.
-            </summary>
-            <remarks>
-            The <see cref="T:System.Diagnostics.DebuggerStepperBoundaryAttribute"/> attribute is used as an escape from the effect of a <see cref="T:System.Diagnostics.DebuggerNonUserCodeAttribute"/>. When executing within the boundaries of the <see cref="T:System.Diagnostics.DebuggerNonUserCodeAttribute"/>, designer-provided code is executed as a step-through until the next user supplied code is encountered. When context switches are made on a thread, the next user-supplied code module stepped into may not relate to the code that was in the process of being debugged. To avoid this debugging experience, use the <see cref="T:System.Diagnostics.DebuggerStepperBoundaryAttribute"/> to escape from stepping through code to running code. For example, in Visual Studio 2005, encountering a <see cref="T:System.Diagnostics.DebuggerStepperBoundaryAttribute"/> while stepping through code using the F10 key (or Step Over command) has the same effect as pressing the F5 key or using the Start Debugging command.
-            </remarks>
-        </member>
-        <member name="M:System.Diagnostics.DebuggerStepperBoundaryAttribute.#ctor">
-            <summary>
-            Initializes a new instance of the <see cref="T:System.Diagnostics.DebuggerStepperBoundaryAttribute"/> class.
-            </summary>
-        </member>
-        <member name="T:System.Diagnostics.DebuggerHiddenAttribute">
-            <summary>
-            Specifies the DebuggerHiddenAttribute. This class cannot be inherited.
-            </summary>
-            <remarks>
-            The common language runtime attaches no semantics to this attribute. It is provided for use by source code debuggers. For example, the Visual Studio 2005 debugger does not stop in a method marked with this attribute and does not allow a breakpoint to be set in the method. Other debugger attributes recognized by the Visual Studio 2005 debugger are the <see cref="T:System.Diagnostics.DebuggerNonUserCodeAttribute"/> and the <see cref="T:System.Diagnostics.DebuggerStepThroughAttribute"/>. 
-            </remarks>
-        </member>
-        <member name="M:System.Diagnostics.DebuggerHiddenAttribute.#ctor">
-            <summary>
-            Initializes a new instance of the <see cref="T:System.Diagnostics.DebuggerHiddenAttribute"/> class.
-            </summary>
-        </member>
-        <member name="T:System.Diagnostics.DebuggerNonUserCodeAttribute">
-            <summary>
-            Identifies a type or member that is not part of the user code for an application.
-            </summary>
-            <remarks>
-            Designer provided types and members that are not part of the code specifically created by the user can complicate the debugging experience. This attribute suppresses the display of these adjunct types and members in the debugger window and automatically steps through, rather than into, designer provided code. When the debugger encounters this attribute when stepping through user code, the user experience is to not see the designer provided code and to step to the next user-supplied code statement. 
-            The debugger behaviour when the <see cref="T:System.Diagnostics.DebuggerNonUserCodeAttribute"/> is present is similar to using a combination of the <see cref="T:System.Diagnostics.DebuggerHiddenAttribute"/> attribute, which hides the code from the debugger, and the <see cref="T:System.Diagnostics.DebuggerStepThroughAttribute"/> attribute, which tells the debugger to step through, rather than into, the code it is applied to.
-            </remarks>
-        </member>
-        <member name="M:System.Diagnostics.DebuggerNonUserCodeAttribute.#ctor">
-            <summary>
-            Initializes a new instance of the <see cref="T:System.Diagnostics.DebuggerNonUserCodeAttribute"/> class.
-            </summary>
-        </member>
-        <member name="T:System.Diagnostics.DebuggableAttribute">
-            <summary>
-            Modifies code generation for runtime just-in-time (JIT) debugging. This class cannot be inherited.
-            </summary>
-        </member>
-        <member name="T:System.Diagnostics.DebuggableAttribute.DebuggingModes">
-            <summary>
-            Specifies the debugging mode for the just-in-time (JIT) compiler.
-            </summary>
-        </member>
-        <member name="F:System.Diagnostics.DebuggableAttribute.DebuggingModes.None">
-            <summary>
-            Starting with the .NET Framework version 2.0, JIT tracking information is always generated, and this flag has the same effect as Default,
-            except that it sets the DebuggableAttribute.IsJITTrackingEnabled property to false. However, because JIT tracking is always enabled, 
-            the property value is ignored in version 2.0 or later.
-            Note that, unlike the None flag, the None flag cannot be used to disable JIT optimizations.
-            </summary>
-        </member>
-        <member name="F:System.Diagnostics.DebuggableAttribute.DebuggingModes.Default">
-            <summary>
-            Instructs the just-in-time (JIT) compiler to use its default behaviour, which includes enabling optimizations, disabling Edit and Continue support,
-            and using symbol store sequence points if present. Starting with the .NET Framework version 2.0, JIT tracking information, the Microsoft intermediate
-            language (MSIL) offset to the native-code offset within a method, is always generated.
-            </summary>
-        </member>
-        <member name="F:System.Diagnostics.DebuggableAttribute.DebuggingModes.DisableOptimizations">
-            <summary>
-            Disable optimizations performed by the compiler to make your output file smaller, faster, and more efficient. Optimizations result in code rearrangement
-            in the output file, which can make debugging difficult. Typically optimization should be disabled while debugging. In versions 2.0 or later, combine this
-            value with Default (Default | DisableOptimizations) to enable JIT tracking and disable optimizations.
-            </summary>
-        </member>
-        <member name="F:System.Diagnostics.DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints">
-            <summary>
-            Use the implicit MSIL sequence points, not the program database (PDB) sequence points. The symbolic information normally includes at least one 
-            Microsoft intermediate language (MSIL) offset for each source line. When the just-in-time (JIT) compiler is about to compile a method, it asks 
-            the profiling services for a list of MSIL offsets that should be preserved. These MSIL offsets are called sequence points.
-            </summary>
-        </member>
-        <member name="F:System.Diagnostics.DebuggableAttribute.DebuggingModes.EnableEditAndContinue">
-            <summary>
-            Enable edit and continue. Edit and continue enables you to make changes to your source code while your program is in break mode. The ability to edit and continue is compiler dependent.
-            </summary>
-        </member>
-        <member name="M:System.Diagnostics.DebuggableAttribute.#ctor(System.Boolean,System.Boolean)">
-            <summary>
-            Initializes a new instance of the DebuggableAttribute class, using the specified tracking and optimization options for the just-in-time (JIT) compiler.
-            </summary>
-            <param name="isJITTrackingEnabled">true to enable debugging; otherwise, false.</param>
-            <param name="isJITOptimizerDisabled">true to disable the optimizer for execution; otherwise, false.</param>
-        </member>
-        <member name="M:System.Diagnostics.DebuggableAttribute.#ctor(System.Diagnostics.DebuggableAttribute.DebuggingModes)">
-            <summary>
-            Initializes a new instance of the DebuggableAttribute class, using the specified debugging modes for the just-in-time (JIT) compiler.
-            </summary>
-            <param name="modes">A bitwise combination of the DebuggableAttribute.DebuggingModes values specifying the debugging mode for the JIT compiler.</param>
-        </member>
-        <member name="P:System.Diagnostics.DebuggableAttribute.IsJITTrackingEnabled">
-            <summary>
-            Gets a value that indicates whether the runtime will track information during code generation for the debugger.
-            </summary>
-            <value>true if the runtime will track information during code generation for the debugger; otherwise, false.</value>
-        </member>
-        <member name="P:System.Diagnostics.DebuggableAttribute.IsJITOptimizerDisabled">
-            <summary>
-            Gets a value that indicates whether the runtime optimizer is disabled.
-            </summary>
-            <value>true if the runtime optimizer is disabled; otherwise, false.</value>
-        </member>
-        <member name="P:System.Diagnostics.DebuggableAttribute.DebuggingFlags">
-            <summary>
-            Gets the debugging modes for the attribute.
-            </summary>
-            <value>A bitwise combination of the DebuggableAttribute.DebuggingModes values describing the debugging mode for the just-in-time (JIT) compiler. The default is Default.</value>
-        </member>
-        <member name="T:System.Diagnostics.DebuggerBrowsableState">
-            <summary>
-            Provides display instructions for the debugger.
-            </summary>
-        </member>
-        <member name="F:System.Diagnostics.DebuggerBrowsableState.Never">
-            <summary>
-            Never show the element.
-            </summary>
-        </member>
-        <member name="F:System.Diagnostics.DebuggerBrowsableState.Collapsed">
-            <summary>
-            Show the element as collapsed.
-            </summary>
-        </member>
-        <member name="F:System.Diagnostics.DebuggerBrowsableState.RootHidden">
-            <summary>
-            Do not display the root element; display the child elements if the element is a collection or array of items.
-            </summary>
-        </member>
-        <member name="T:System.Diagnostics.DebuggerBrowsableAttribute">
-            <summary>
-            Determines if and how a member is displayed in the debugger variable windows. This class cannot be inherited.
-            </summary>
-        </member>
-        <member name="M:System.Diagnostics.DebuggerBrowsableAttribute.#ctor(System.Diagnostics.DebuggerBrowsableState)">
-            <summary>
-            Initializes a new instance of the DebuggerBrowsableAttribute class.
-            </summary>
-            <param name="state">One of the DebuggerBrowsableState values that specifies how to display the member.</param>
-            <exception cref="T:System.ArgumentOutOfRangeException"></exception>
-        </member>
-        <member name="P:System.Diagnostics.DebuggerBrowsableAttribute.State">
-            <summary>
-            Gets the display state for the attribute.
-            </summary>
-            <value>One of the DebuggerBrowsableState values.</value>
-        </member>
-        <member name="T:System.Diagnostics.DebuggerTypeProxyAttribute">
-            <summary>
-            Specifies the display proxy for a type.
-            </summary>
-            <remarks>Available only in mscorlib build with support for System.Reflection.</remarks>
-        </member>
-        <member name="M:System.Diagnostics.DebuggerTypeProxyAttribute.#ctor(System.Type)">
-            <summary>
-            Initializes a new instance of the DebuggerTypeProxyAttribute class using the type of the proxy.
-            </summary>
-            <param name="type">The proxy type.</param>
-            <exception cref="T:System.ArgumentNullException"></exception>
-        </member>
-        <member name="M:System.Diagnostics.DebuggerTypeProxyAttribute.#ctor(System.String)">
-            <summary>
-            Initializes a new instance of the DebuggerTypeProxyAttribute class using the type name of the proxy.
-            </summary>
-            <param name="typeName">The type name of the proxy type.</param>
-        </member>
-        <member name="P:System.Diagnostics.DebuggerTypeProxyAttribute.ProxyTypeName">
-            <summary>
-            Gets the type name of the proxy type.
-            </summary>
-            <value>The type name of the proxy type.</value>
-        </member>
-        <member name="P:System.Diagnostics.DebuggerTypeProxyAttribute.Target">
-            <summary>
-            Gets or sets the target type for the attribute.
-            </summary>
-            <value>The target type for the attribute.</value>
-            <exception cref="T:System.ArgumentNullException">Target is set to null.</exception>
-        </member>
-        <member name="P:System.Diagnostics.DebuggerTypeProxyAttribute.TargetTypeName">
-            <summary>
-            Gets or sets the name of the target type.
-            </summary>
-            <value>
-            The name of the target type.
-            </value>
-        </member>
-        <member name="T:System.Diagnostics.DebuggerDisplayAttribute">
-            <summary>
-            Determines how a class or field is displayed in the debugger variable windows.
-            </summary>
-        </member>
-        <member name="M:System.Diagnostics.DebuggerDisplayAttribute.#ctor(System.String)">
-            <summary>
-            Initializes a new instance of the DebuggerDisplayAttribute class.
-            </summary>
-            <param name="value">The string to be displayed in the value column for instances of the type; an empty string ("") causes the value column to be hidden.</param>
-        </member>
-        <member name="P:System.Diagnostics.DebuggerDisplayAttribute.Value">
-            <summary>
-            Gets the string to display in the value column of the debugger variable windows.
-            </summary>
-            <value>The string to display in the value column of the debugger variable.</value>
-        </member>
-        <member name="P:System.Diagnostics.DebuggerDisplayAttribute.Name">
-            <summary>
-            Gets or sets the name to display in the debugger variable windows.
-            </summary>
-            <value>The name to display in the debugger variable windows.</value>
-        </member>
-        <member name="P:System.Diagnostics.DebuggerDisplayAttribute.Type">
-            <summary>
-            Gets or sets the string to display in the type column of the debugger variable windows.
-            </summary>
-            <value>The string to display in the type column of the debugger variable windows.</value>
-        </member>
-        <member name="P:System.Diagnostics.DebuggerDisplayAttribute.Target">
-            <summary>
-            Gets or sets the type of the attribute's target.
-            </summary>
-            <value>The attribute's target type.</value>
-            <exception cref="T:System.ArgumentNullException">value</exception>
-        </member>
-        <member name="P:System.Diagnostics.DebuggerDisplayAttribute.TargetTypeName">
-            <summary>
-            Gets or sets the type name of the attribute's target.
-            </summary>
-            <value>The name of the attribute's target type.</value>
-        </member>
-        <member name="T:System.Diagnostics.CodeAnalysis.AllowNullAttribute">
-            <summary>
-            Specifies that <see langword="null"/> is allowed as an input even if the corresponding type disallows it.
-            </summary>
-            <remarks>
-            To override a method that has a parameter annotated with this attribute, use the ? operator. For more information, see Nullable static analysis in the C# guide.
-            </remarks>
-        </member>
-        <member name="T:System.Diagnostics.CodeAnalysis.DisallowNullAttribute">
-            <summary>
-            Specifies that null is disallowed as an input even if the corresponding type allows it.
-            </summary>
-        </member>
-        <member name="T:System.Diagnostics.CodeAnalysis.MaybeNullAttribute">
-            <summary>
-            Specifies that an output may be null even if the corresponding type disallows it.
-            </summary>
-        </member>
-        <member name="T:System.Diagnostics.CodeAnalysis.NotNullAttribute">
-            <summary>
-            Specifies that an output will not be null even if the corresponding type allows it. Specifies that an input argument was not null when the call returns.
-            </summary>
-        </member>
-        <member name="T:System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute">
-            <summary>
-            Specifies that when a method returns <see cref="P:System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.ReturnValue"/>, the parameter may be null even if the corresponding type disallows it.
-            </summary>
-        </member>
-        <member name="M:System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.#ctor(System.Boolean)">
-            <summary>
-            Initializes the attribute with the specified return value condition.
-            </summary>
-            <param name="returnValue">
-            The return value condition. If the method returns this value, the associated parameter may be null.
-            </param>
-        </member>
-        <member name="P:System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.ReturnValue">
-            <summary>
-            Gets the return value condition.
-            </summary>
-        </member>
-        <member name="T:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute">
-            <summary>
-            Specifies that when a method returns <see cref="P:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute.ReturnValue"/>, the parameter will not be null even if the corresponding type allows it.
-            </summary>
-        </member>
-        <member name="M:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute.#ctor(System.Boolean)">
-            <summary>Initializes the attribute with the specified return value condition.</summary>
-            <param name="returnValue">
-            The return value condition. If the method returns this value, the associated parameter will not be null.
-            </param>
-        </member>
-        <member name="P:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute.ReturnValue">
-            <summary>Gets the return value condition.</summary>
-        </member>
-        <member name="T:System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute">
-            <summary>
-            Specifies that the output will be non-null if the named parameter is non-null.
-            </summary>
-        </member>
-        <member name="M:System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute.#ctor(System.String)">
-            <summary>Initializes the attribute with the associated parameter name.</summary>
-            <param name="parameterName">
-            The associated parameter name.  The output will be non-null if the argument to the parameter specified is non-null.
-            </param>
-        </member>
-        <member name="P:System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute.ParameterName">
-            <summary>Gets the associated parameter name.</summary>
-        </member>
-        <member name="T:System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute">
-            <summary>
-            Applied to a method that will never return under any circumstance.
-            </summary>
-        </member>
-        <member name="T:System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute">
-            <summary>
-            Specifies that the method will not return if the associated Boolean parameter is passed the specified value.
-            </summary>
-        </member>
-        <member name="M:System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute.#ctor(System.Boolean)">
-            <summary>Initializes the attribute with the specified parameter value.</summary>
-            <param name="parameterValue">
-            The condition parameter value. Code after the method will be considered unreachable by diagnostics if the argument to
-            the associated parameter matches this value.
-            </param>
-        </member>
-        <member name="P:System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute.ParameterValue">
-            <summary>
-            Gets the condition parameter value.
-            </summary>
-        </member>
-        <member name="T:System.Diagnostics.CodeAnalysis.MemberNotNullAttribute">
-            <summary>
-            Specifies that the method or property will ensure that the listed field and property members have not-null values.
-            </summary>
-        </member>
-        <member name="M:System.Diagnostics.CodeAnalysis.MemberNotNullAttribute.#ctor(System.String)">
-            <summary>Initializes the attribute with a field or property member.</summary>
-            <param name="member">
-            The field or property member that is promised to be not-null.
-            </param>
-        </member>
-        <member name="M:System.Diagnostics.CodeAnalysis.MemberNotNullAttribute.#ctor(System.String[])">
-            <summary>Initializes the attribute with the list of field and property members.</summary>
-            <param name="members">
-            The list of field and property members that are promised to be not-null.
-            </param>
-        </member>
-        <member name="P:System.Diagnostics.CodeAnalysis.MemberNotNullAttribute.Members">
-            <summary>
-            Gets field or property member names.
-            </summary>
-        </member>
-        <member name="T:System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute">
-            <summary>
-            Specifies that the method or property will ensure that the listed field and property members have not-null values when returning with the specified return value condition.
-            </summary>
-        </member>
-        <member name="M:System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute.#ctor(System.Boolean,System.String)">
-            <summary>Initializes the attribute with the specified return value condition and a field or property member.</summary>
-            <param name="returnValue">
-            The return value condition. If the method returns this value, the associated parameter will not be null.
-            </param>
-            <param name="member">
-            The field or property member that is promised to be not-null.
-            </param>
-        </member>
-        <member name="M:System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute.#ctor(System.Boolean,System.String[])">
-            <summary>Initializes the attribute with the specified return value condition and list of field and property members.</summary>
-            <param name="returnValue">
-            The return value condition. If the method returns this value, the associated parameter will not be null.
-            </param>
-            <param name="members">
-            The list of field and property members that are promised to be not-null.
-            </param>
-        </member>
-        <member name="P:System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute.ReturnValue">
-            <summary>
-            Gets the return value condition.
-            </summary>
-        </member>
-        <member name="P:System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute.Members">
-            <summary>
-            Gets field or property member names.
-            </summary>
-        </member>
         <member name="T:System.Double">
             <summary>
             Represents a double-precision floating-point number.
@@ -3290,26 +3298,55 @@
             Initializes a new instance of the <see cref="T:System.Guid"/> structure by using the specified array of bytes.
             </summary>
             <param name="b">A 16-element byte array containing values with which to initialize the GUID.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="b"/> is <see langword="null"/>.</exception>
+            <exception cref="T:System.ArgumentException"><paramref name="b"/> is not 16 bytes long.</exception>"
         </member>
         <member name="M:System.Guid.#ctor(System.String)">
-            <summary>
-              Creates a new <see cref="T:System.Guid"/> based on the value in the string.  The value is made up
-              of hex digits speared by the dash ("-"). The string may begin and end with
-              brackets ("{", "}").
-              
-              The string must be of the form dddddddd-dddd-dddd-dddd-dddddddddddd. where
-              d is a hex digit. (That is 8 hex digits, followed by 4, then 4, then 4,
-              then 12) such as: "CA761232-ED42-11CE-BACD-00AA0057B223"
-            </summary>
-            <param name="g">String representation of new <see cref="T:System.Guid"/>.</param>
-            <exception cref="T:System.ArgumentException"></exception>
+             <summary>
+             Initializes a new instance of the <see cref="T:System.Guid"/> structure by using the value represented by the specified string.
+             </summary>
+             <param name="g">
+             A string that contains a GUID in one of the following formats ("d" represents a hexadecimal digit whose case is ignored):
+            
+             32 contiguous hexadecimal digits:
+            
+             dddddddddddddddddddddddddddddddd
+            
+             -or-
+            
+             Groups of 8, 4, 4, 4, and 12 hexadecimal digits with hyphens between the groups. The entire GUID can optionally be enclosed in matching braces or parentheses:
+            
+             dddddddd-dddd-dddd-dddd-dddddddddddd
+            
+             -or-
+            
+             {dddddddd-dddd-dddd-dddd-dddddddddddd}
+            
+             -or-
+            
+             (dddddddd-dddd-dddd-dddd-dddddddddddd)
+            
+             -or-
+            
+             Groups of 8, 4, and 4 hexadecimal digits, and a subset of eight groups of 2 hexadecimal digits, with each group prefixed by "0x" or "0X", and separated by commas. The entire GUID, as well as the subset, is enclosed in matching braces:
+            
+             {0xdddddddd, 0xdddd, 0xdddd,{0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd}}
+            
+             All braces, commas, and "0x" prefixes are required. All embedded spaces are ignored. All leading zeros in a group are ignored.
+            
+             The hexadecimal digits shown in a group are the maximum number of meaningful hexadecimal digits that can appear in that group. You can specify from 1 to the number of hexadecimal digits shown for a group. The specified digits are assumed to be the low-order digits of the group.
+             </param>
+             <exception cref="T:System.ArgumentNullException"><paramref name="g"/> is <see langword="null"/>.</exception>"
+             <exception cref="T:System.ArgumentException"><paramref name="g"/> is not in a recognized format.</exception>
         </member>
         <member name="M:System.Guid.CompareTo(System.Object)">
             <summary>
             Compares this instance to a specified object and returns an indication of their relative values.
             </summary>
-            <param name="value">Guid instance to compare, or null.</param>
-            <returns>Indication of the relative values (0 = equal, -1 = this instance less, +1 = this instance greater)</returns>
+            <param name="value">An object to compare, or <see langword="null"/>.</param>
+            <returns>A signed number indicating the relative values of this instance and value.
+            (0 = This instance is equal to <paramref name="value"/>., -1 = This instance is less than <paramref name="value"/>., +1 = This instance is greater than <paramref name="value"/>, or <paramref name="value"/> is <see langword="null"/>.)</returns>
+            <exception cref="T:System.ArgumentException"><paramref name="value"/> is not a <see cref="T:System.Guid"/>.</exception>
         </member>
         <member name="M:System.Guid.ToByteArray">
             <summary>
@@ -3319,7 +3356,7 @@
         </member>
         <member name="M:System.Guid.ToString">
              <summary>
-             Returns a string representation of the value of this instance of the <see cref="T:System.Guid"/> structure.
+             Returns a string representation of the value of this instance in registry format.
              </summary>
              <returns>The value of this Guid, formatted by using the "D" format specifier as follows: 
             
@@ -3332,8 +3369,9 @@
             <summary>
             Returns a value that indicates whether this instance is equal to a specified object.
             </summary>
-            <param name="obj">The object to compare with this instance. </param>
-            <returns></returns>
+            <param name="o">The object to compare with this instance. </param>
+            <returns><see langword="true"/> if <paramref name="o"/> is a <see cref="T:System.Guid"/> that has the same value as this instance; otherwise, <see langword="false"/>.</returns>
+            <remarks>Two <see cref="T:System.Guid"/> objects are equal if they have identical byte values.</remarks>
         </member>
         <member name="M:System.Guid.GetHashCode">
             <summary>
@@ -3357,9 +3395,9 @@
               d is a hex digit. (That is 8 hex digits, followed by 4, then 4, then 4,
               then 12) such as: "CA761232-ED42-11CE-BACD-00AA0057B223"
             </summary>
-            <param name="guidString">Guid string to parse.</param>
-            <param name="result">Resulting Guid.</param>
-            <returns></returns>
+            <param name="guidString">A string containing the GUID to convert.</param>
+            <param name="result">When this method returns, contains the parsed value. If the method returns <see langword="true"/>, result contains a valid <see cref="T:System.Guid"/>. If the method returns <see langword="false"/>, result equals <see cref="F:System.Guid.Empty"/>.</param>
+            <returns><see langword="true"/> if the parse operation was successful; otherwise, <see langword="false"/>.</returns>
         </member>
         <member name="M:System.Guid.HexStringToLong(System.String,System.Int32@,System.Int32)">
             <summary>
@@ -5251,10 +5289,18 @@
             The name of the property used to access the attributed field.
             </value>
         </member>
-        <member name="T:System.Runtime.CompilerServices.ExcludeFromStubsAttribute">
+        <member name="T:System.Runtime.CompilerServices.ExcludeTypeAttribute">
             <summary>
-            When a class, enum, or struct is marked with <see cref="T:System.Runtime.CompilerServices.ExcludeFromStubsAttribute"/> it will be excluded from the native stubs generated by .NET nanoFramework metadata processor.
+            When a class, enum, or struct is marked with <see cref="T:System.Runtime.CompilerServices.ExcludeTypeAttribute"/> it will be excluded from the PE files and stubbs generated by .NET nanoFramework metadata processor.
             </summary>
+            <remarks>
+            <para>
+            This attribute is exclusive to .NET nanoFramework and is not part of the .NET Standard.
+            </para>
+            <para>
+            [!Important] Placing this attribute on a class will cause the type from being excluded from the assembly metadata and therefore it will not be available at all in assemblies using or referencing them.
+            </para>
+            </remarks>
         </member>
         <member name="T:System.Runtime.CompilerServices.ExtensionAttribute">
             <summary>

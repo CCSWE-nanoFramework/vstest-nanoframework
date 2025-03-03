@@ -1,5 +1,4 @@
 using nanoFramework.TestFramework;
-using System;
 using NFClassLibrary1;
 
 namespace NFUnitTest1
