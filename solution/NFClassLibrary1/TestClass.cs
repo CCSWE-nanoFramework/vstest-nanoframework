@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace NFClassLibrary1
+﻿namespace NFClassLibrary1
 {
     public class TestClass
     {

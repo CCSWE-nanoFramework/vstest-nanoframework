@@ -7,7 +7,7 @@ import * as win32 from 'path/win32'
 const solutionFolder = path.join(__dirname, './__solution__')
 const packageFolder = path.join(
   solutionFolder,
-  'packages/nanoFramework.TestFramework.3.0.57'
+  'packages/nanoFramework.TestFramework.3.0.68'
 )
 const testAdapter = path.join(
   packageFolder,
