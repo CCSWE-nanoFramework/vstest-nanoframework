@@ -65,7 +65,7 @@ export function getActionInputs(): Inputs {
 export function getBooleanInput(name: string, defaultValue: boolean): boolean {
   try {
     return core.getBooleanInput(name) ?? defaultValue
-  } catch (error) {
+  } catch {
     return defaultValue
   }
 }
@@ -84,7 +84,7 @@ export function getNumberInput(name: string, defaultValue: number): number {
     }
 
     return input
-  } catch (error) {
+  } catch {
     return defaultValue
   }
 }
@@ -93,7 +93,7 @@ export function getStringInput(name: string, defaultValue: string): string {
   try {
     const input = core.getInput(name) ?? defaultValue
     return input ? input : defaultValue
-  } catch (error) {
+  } catch {
     return defaultValue
   }
 }

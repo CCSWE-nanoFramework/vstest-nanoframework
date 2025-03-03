@@ -91,7 +91,7 @@ export default [
         }
       ],
 
-      '@typescript-eslint/func-call-spacing': ['error', 'never'],
+      //'@typescript-eslint/func-call-spacing': ['error', 'never'],
       '@typescript-eslint/no-array-constructor': 'error',
       '@typescript-eslint/no-empty-interface': 'error',
       '@typescript-eslint/no-explicit-any': 'error',
@@ -115,9 +115,9 @@ export default [
       '@typescript-eslint/promise-function-async': 'error',
       '@typescript-eslint/require-array-sort-compare': 'error',
       '@typescript-eslint/restrict-plus-operands': 'error',
-      '@typescript-eslint/semi': ['error', 'never'],
+      //'@typescript-eslint/semi': ['error', 'never'],
       '@typescript-eslint/space-before-function-paren': 'off',
-      '@typescript-eslint/type-annotation-spacing': 'error',
+      //'@typescript-eslint/type-annotation-spacing': 'error',
       '@typescript-eslint/unbound-method': 'error'
     }
   }
