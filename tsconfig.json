@@ -14,7 +14,8 @@
     "strict": true,
     "skipLibCheck": true,
     "newLine": "lf",
-    "useUnknownInCatchVariables": false
+    "useUnknownInCatchVariables": false,
+    "isolatedModules": true
   },
   "exclude": ["./dist", "./node_modules", "./__tests__", "./coverage"]
 }
