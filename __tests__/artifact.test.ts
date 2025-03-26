@@ -8,8 +8,17 @@ jest.mock('@actions/artifact', () => {
   return {
     DefaultArtifactClient: jest.fn().mockImplementation(() => {
       return {
-        uploadArtifact: () => {
-          return { id: 'id', size: 420 }
+        uploadArtifact: (name: string) => {
+          switch (name) {
+            case 'invalid_size':
+              return { id: 'id', size: 0 }
+            case 'undefined_id':
+              return { id: undefined, size: 420 }
+            case 'undefined_size':
+              return { id: 'id', size: undefined }
+            default:
+              return { id: 'id', size: 420 }
+          }
         }
       }
     })
@@ -42,11 +51,56 @@ describe('uploadArtifact()', () => {
     await expect(sut.uploadArtifact(name, path)).rejects.toThrow()
   })
 
-  it('uploads artifact', async () => {
+  it('throws if id is undefined', async () => {
+    findMock.mockImplementation(async () => {
+      return {
+        directories: [],
+        files: ['file1'],
+        searchPaths: ['searchPath1']
+      }
+    })
+
+    const name = 'undefined_id'
+    const path = 'artifact_path'
+
+    await expect(sut.uploadArtifact(name, path)).rejects.toThrow()
+  })
+
+  it('throws if size is invalid', async () => {
     findMock.mockImplementation(async () => {
       return {
         directories: [],
         files: ['file1', 'file2'],
+        searchPaths: ['searchPath1']
+      }
+    })
+
+    const name = 'invalid_size'
+    const path = 'artifact_path'
+
+    await expect(sut.uploadArtifact(name, path)).rejects.toThrow()
+  })
+
+  it('throws if size is undefined', async () => {
+    findMock.mockImplementation(async () => {
+      return {
+        directories: [],
+        files: ['file1', 'file2', 'file3'],
+        searchPaths: ['searchPath1']
+      }
+    })
+
+    const name = 'undefined_size'
+    const path = 'artifact_path'
+
+    await expect(sut.uploadArtifact(name, path)).rejects.toThrow()
+  })
+
+  it('uploads artifact', async () => {
+    findMock.mockImplementation(async () => {
+      return {
+        directories: [],
+        files: ['file1', 'file2', 'file3', 'file4'],
         searchPaths: ['searchPath1']
       }
     })
