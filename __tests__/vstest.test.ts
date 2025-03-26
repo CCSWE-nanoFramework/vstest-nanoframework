@@ -3,11 +3,13 @@ import { Default, Inputs } from '../src/inputs'
 import * as path from '../src/path'
 import * as powershell from '../src/powershell'
 import * as sut from '../src/vstest'
+import * as find from '../src/find'
 
 const SolutionFolder = path.join(__dirname, './__solution__')
 
 let execMock: jest.SpiedFunction<typeof exec.exec>
 let expandArchiveMock: jest.SpiedFunction<typeof powershell.expandArchive>
+let findMock: jest.SpiedFunction<typeof find.find>
 let invokeWebRequestMock: jest.SpiedFunction<typeof powershell.invokeWebRequest>
 
 describe('downloadTestTools()', () => {
@@ -163,6 +165,42 @@ describe('getTestAssemblies()', () => {
     }
 
     await expect(sut.getTestAssemblies(inputs)).rejects.toThrow()
+  })
+})
+
+describe('getVsTestPath()', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+
+    findMock = jest.spyOn(find, 'find').mockImplementation()
+  })
+
+  it('finds returns empty string', async () => {
+    findMock.mockImplementation(async () => {
+      return {
+        directories: [],
+        files: [],
+        searchPaths: []
+      }
+    })
+
+    const results = await sut.getVsTestPath()
+
+    expect(results).toBe('')
+  })
+
+  it('finds returns first path', async () => {
+    findMock.mockImplementation(async () => {
+      return {
+        directories: [],
+        files: ['file1', 'file2'],
+        searchPaths: ['searchPath1']
+      }
+    })
+
+    const results = await sut.getVsTestPath()
+
+    expect(results).toBe('file1')
   })
 })
 
