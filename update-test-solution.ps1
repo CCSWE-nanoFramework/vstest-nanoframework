@@ -1,14 +1,14 @@
 
 Remove-Item -Path ".\solution\packages\*" -Recurse -Force
 
-nuget update .\solution\VsTestAction.sln
-#TODO: MSBuild the Debug solution
-#TODO: MSBuild the Release solution
+& nuget update .\solution\VsTestAction.sln
+& nuget restore .\solution\VsTestAction.sln
 
-#Remove-Item -Path ".\__tests__\__solution__\packages\*" -Recurse -Force
-#TODO: Copy the packages from the solution folder to the test solution folder
+& 'C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\amd64\msbuild.exe' .\solution\VsTestAction.sln -t:Rebuild -p:Configuration=Debug
+& 'C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\amd64\msbuild.exe' .\solution\VsTestAction.sln -t:Rebuild -p:Configuration=Release
 
-#TODO: Update tests for correct TestFramework version
+Remove-Item -Path ".\__tests__\__solution__\packages\*" -Recurse -Force
+Copy-Item -Path ".\solution\packages\*.TestFramework.*" -Destination ".\__tests__\__solution__\packages\" -Recurse -Force
 
 Remove-Item -Path ".\__tests__\__solution__\project1\bin\Debug\*" -Recurse -Force
 Copy-Item -Path ".\solution\NFUnitTest1\bin\Debug" -Destination ".\__tests__\__solution__\project1\bin\Debug" -Recurse -Force

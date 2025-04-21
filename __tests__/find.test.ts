@@ -5,14 +5,6 @@ import * as posix from 'path/posix'
 import * as win32 from 'path/win32'
 
 const solutionFolder = path.join(__dirname, './__solution__')
-const packageFolder = path.join(
-  solutionFolder,
-  'packages/nanoFramework.TestFramework.3.0.77'
-)
-const testAdapter = path.join(
-  packageFolder,
-  'lib/net48/nanoFramework.TestAdapter.dll'
-)
 
 describe('find()', () => {
   it('finds directory', async () => {
@@ -21,7 +13,7 @@ describe('find()', () => {
     )
 
     expect(results.directories.length).toBeGreaterThan(0)
-    expect(results.directories[0]).toBe(packageFolder)
+    expect(results.directories[0]).toContain('nanoFramework.TestFramework.')
     expect(results.files.length).toBeGreaterThan(0)
     expect(results.searchPaths.length).toBe(1)
     expect(results.searchPaths[0]).toBe(solutionFolder)
@@ -37,7 +29,7 @@ describe('find()', () => {
 
     expect(results.directories.length).toBe(0)
     expect(results.files.length).toBe(1)
-    expect(results.files[0]).toBe(testAdapter)
+    expect(results.files[0]).toContain('nanoFramework.TestAdapter.dll')
     expect(results.searchPaths.length).toBe(1)
     expect(results.searchPaths[0]).toBe(solutionFolder)
   })
