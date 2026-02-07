@@ -46,7 +46,7 @@ jobs:
 
   test-action:
     name: GitHub Actions Test
-    runs-on: windows-latest
+    runs-on: windows-2022
     env:
       BUILD_CONFIGURATION: 'Release'
       GITHUB_TOKEN: ${{ github.token }}
@@ -62,6 +62,9 @@ jobs:
 
       - name: Setup nanoFramework
         uses: nanoframework/nanobuild@v1
+
+      - name: Update nanoclr
+        run: dotnet tool update -g nanoclr
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
