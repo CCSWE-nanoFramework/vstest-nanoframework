@@ -24,7 +24,8 @@ export default [
       '**/dist/',
       '**/node_modules/',
       '**/*.json',
-      'eslint.config.mjs'
+      'eslint.config.mjs',
+      'babel.config.js'
     ]
   },
   ...compat.extends(

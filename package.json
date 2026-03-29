@@ -61,8 +61,11 @@
       "/dist/"
     ],
     "transform": {
-      "^.+\\.ts$": "ts-jest"
+      "^.+\\.ts$": "babel-jest"
     },
+    "transformIgnorePatterns": [
+      "/node_modules/(?!(.*?\\.mjs$))"
+    ],
     "coverageReporters": [
       "json-summary",
       "text",
@@ -71,15 +74,21 @@
     "collectCoverage": true,
     "collectCoverageFrom": [
       "./src/**"
+    ],
+    "extensionsToTreatAsEsm": [
+      ".ts"
     ]
   },
   "dependencies": {
-    "@actions/artifact": "^4.0.0",
+    "@actions/artifact": "^5.0.1",
     "@actions/core": "^2.0.1",
     "@actions/exec": "^2.0.0",
     "@actions/glob": "^0.5.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.2",
+    "@babel/preset-typescript": "^7.28.5",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.39.0",
     "@jest/globals": "^30.2.0",
@@ -88,6 +97,7 @@
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.1",
     "@vercel/ncc": "^0.38.4",
+    "babel-jest": "^30.3.0",
     "eslint": "^9.39.0",
     "eslint-plugin-github": "^5.1.8",
     "eslint-plugin-import": "^2.32.0",
