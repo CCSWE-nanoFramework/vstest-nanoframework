@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import * as glob from '@actions/glob'
 import { stat } from 'fs'
 import { promisify } from 'util'
-import * as path from './path'
+import * as path from './path.js'
 
 const statAsync = promisify(stat)
 

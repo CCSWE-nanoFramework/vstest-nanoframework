@@ -1,8 +1,8 @@
 import * as core from '@actions/core'
 import * as path from 'path'
-import * as artifact from './artifact'
-import * as vstest from './vstest'
-import { Default, getActionInputs } from './inputs'
+import * as artifact from './artifact.js'
+import * as vstest from './vstest.js'
+import { Default, getActionInputs } from './inputs.js'
 
 export async function run(): Promise<void> {
   let testsExecuted = false

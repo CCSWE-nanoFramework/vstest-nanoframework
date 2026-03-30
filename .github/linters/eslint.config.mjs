@@ -1,4 +1,3 @@
-import jest from 'eslint-plugin-jest'
 import typescriptEslint from '@typescript-eslint/eslint-plugin'
 import globals from 'globals'
 import tsParser from '@typescript-eslint/parser'
@@ -33,19 +32,16 @@ export default [
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:github/recommended',
-    'plugin:import/recommended',
-    'plugin:jest/recommended'
+    'plugin:import/recommended'
   ),
   {
     plugins: {
-      jest,
       '@typescript-eslint': typescriptEslint
     },
 
     languageOptions: {
       globals: {
         ...globals.node,
-        ...globals.jest,
         Atomics: 'readonly',
         SharedArrayBuffer: 'readonly'
       },

@@ -9,6 +9,7 @@
     "sourceMap": true,
     "outDir": "./dist",
     "noImplicitAny": true,
+    "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,

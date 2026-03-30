@@ -1,13 +1,17 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest'
 import * as exec from '@actions/exec'
 import * as sut from '../src/powershell'
 
-let execMock: jest.SpiedFunction<typeof exec.exec>
+vi.mock('@actions/exec', () => ({
+  exec: vi.fn().mockResolvedValue(undefined)
+}))
+
+let execMock: ReturnType<typeof vi.fn>
 
 describe('expandArchive()', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-
-    execMock = jest.spyOn(exec, 'exec').mockImplementation()
+    vi.clearAllMocks()
+    execMock = vi.mocked(exec.exec)
   })
 
   it('executes powershell', async () => {
@@ -24,9 +28,8 @@ describe('expandArchive()', () => {
 
 describe('invokeWebRequest()', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-
-    execMock = jest.spyOn(exec, 'exec').mockImplementation()
+    vi.clearAllMocks()
+    execMock = vi.mocked(exec.exec)
   })
 
   it('executes powershell', async () => {

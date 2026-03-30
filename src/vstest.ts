@@ -1,9 +1,12 @@
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import path from 'path'
-import { Input, Inputs } from './inputs'
-import { find } from './find'
-import * as powershell from './powershell'
+import { fileURLToPath } from 'url'
+import { Input, Inputs } from './inputs.js'
+import { find } from './find.js'
+import * as powershell from './powershell.js'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export async function downloadTestTools(): Promise<string> {
   core.info(`Downloading test tools...`)

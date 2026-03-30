@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import * as sut from '../src/find'
 import * as path from '../src/path'
 

@@ -1,4 +1,10 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { vi, describe, it, expect, beforeEach } from 'vitest'
 import * as exec from '@actions/exec'
+
+vi.mock('@actions/exec', () => ({
+  exec: vi.fn().mockResolvedValue(undefined)
+}))
 import { Default, Inputs } from '../src/inputs'
 import * as path from '../src/path'
 import * as powershell from '../src/powershell'
@@ -7,19 +13,19 @@ import * as find from '../src/find'
 
 const SolutionFolder = path.join(__dirname, './__solution__')
 
-let execMock: jest.SpiedFunction<typeof exec.exec>
-let expandArchiveMock: jest.SpiedFunction<typeof powershell.expandArchive>
-let findMock: jest.SpiedFunction<typeof find.find>
-let invokeWebRequestMock: jest.SpiedFunction<typeof powershell.invokeWebRequest>
+let execMock: ReturnType<typeof vi.spyOn>
+let expandArchiveMock: ReturnType<typeof vi.spyOn>
+let findMock: ReturnType<typeof vi.spyOn>
+let invokeWebRequestMock: ReturnType<typeof vi.spyOn>
 
 describe('downloadTestTools()', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
-    expandArchiveMock = jest
+    expandArchiveMock = vi
       .spyOn(powershell, 'expandArchive')
       .mockImplementation()
-    invokeWebRequestMock = jest
+    invokeWebRequestMock = vi
       .spyOn(powershell, 'invokeWebRequest')
       .mockImplementation()
   })
@@ -170,9 +176,9 @@ describe('getTestAssemblies()', () => {
 
 describe('getVsTestPath()', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
-    findMock = jest.spyOn(find, 'find').mockImplementation()
+    findMock = vi.spyOn(find, 'find').mockImplementation()
   })
 
   it('finds returns empty string', async () => {
@@ -206,9 +212,9 @@ describe('getVsTestPath()', () => {
 
 describe('runTests()', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
-    execMock = jest.spyOn(exec, 'exec').mockImplementation()
+    execMock = vi.mocked(exec.exec)
   })
 
   it('executes vstest.console.exe', async () => {
