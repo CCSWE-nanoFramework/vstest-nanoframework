@@ -1,10 +1,10 @@
-import { vi, describe, it, expect, beforeEach } from 'vitest'
+import { vi, describe, it, expect, beforeEach, type MockInstance } from 'vitest'
 import * as core from '@actions/core'
-import * as artifact from '../src/artifact'
-import * as inputs from '../src/inputs'
-import * as sut from '../src/main'
-import * as vstest from '../src/vstest'
-import { Inputs } from '../src/inputs'
+import * as artifact from '../src/artifact.js'
+import * as inputs from '../src/inputs.js'
+import * as sut from '../src/main.js'
+import * as vstest from '../src/vstest.js'
+import { Inputs } from '../src/inputs.js'
 
 vi.mock('@actions/core', () => ({
   debug: vi.fn(),
@@ -13,12 +13,12 @@ vi.mock('@actions/core', () => ({
   warning: vi.fn()
 }))
 
-let getRunSettingsMock: ReturnType<typeof vi.spyOn>
-let getTestAdaptersMock: ReturnType<typeof vi.spyOn>
-let getTestAssembliesMock: ReturnType<typeof vi.spyOn>
-let setFailedMock: ReturnType<typeof vi.spyOn>
-let uploadArtifactMock: ReturnType<typeof vi.spyOn>
-let warningMock: ReturnType<typeof vi.spyOn>
+let getRunSettingsMock: MockInstance<typeof vstest.getRunSettings>
+let getTestAdaptersMock: MockInstance<typeof vstest.getTestAdapters>
+let getTestAssembliesMock: MockInstance<typeof vstest.getTestAssemblies>
+let setFailedMock: MockInstance<typeof core.setFailed>
+let uploadArtifactMock: MockInstance<typeof artifact.uploadArtifact>
+let warningMock: MockInstance<typeof core.warning>
 
 const inputsMock: Inputs = {
   enableCodeCoverage: false,

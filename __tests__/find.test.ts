@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import * as sut from '../src/find'
-import * as path from '../src/path'
+import * as sut from '../src/find.js'
+import * as path from '../src/path.js'
 
 import * as posix from 'path/posix'
 import * as win32 from 'path/win32'

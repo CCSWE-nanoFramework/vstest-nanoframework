@@ -1,19 +1,21 @@
-import { vi, describe, it, expect, beforeEach } from 'vitest'
+import { vi, describe, it, expect, beforeEach, type MockInstance } from 'vitest'
 import * as core from '@actions/core'
-import * as sut from '../src/inputs'
-import { Default, Input } from '../src/inputs'
+import * as sut from '../src/inputs.js'
+import { Default, Input } from '../src/inputs.js'
 
 vi.mock('@actions/core')
 
-let getBooleanInputMock: ReturnType<typeof vi.spyOn>
-let getInputMock: ReturnType<typeof vi.spyOn>
+let getBooleanInputMock: MockInstance<typeof core.getBooleanInput>
+let getInputMock: MockInstance<typeof core.getInput>
 
 describe('getActionInputs()', () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
-    getBooleanInputMock = vi.spyOn(core, 'getBooleanInput').mockImplementation()
-    getInputMock = vi.spyOn(core, 'getInput').mockImplementation()
+    getBooleanInputMock = vi
+      .spyOn(core, 'getBooleanInput')
+      .mockImplementation(() => false)
+    getInputMock = vi.spyOn(core, 'getInput').mockImplementation(() => '')
   })
 
   it('sets correct defaults', () => {
@@ -57,7 +59,9 @@ describe('getBooleanInput()', () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
-    getBooleanInputMock = vi.spyOn(core, 'getBooleanInput').mockImplementation()
+    getBooleanInputMock = vi
+      .spyOn(core, 'getBooleanInput')
+      .mockImplementation(() => false)
   })
 
   it('returns correct value', () => {
@@ -85,7 +89,7 @@ describe('getNumberInput()', () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
-    getInputMock = vi.spyOn(core, 'getInput').mockImplementation()
+    getInputMock = vi.spyOn(core, 'getInput').mockImplementation(() => '')
   })
 
   it('returns correct value', () => {
@@ -131,7 +135,7 @@ describe('getStringInput()', () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
-    getInputMock = vi.spyOn(core, 'getInput').mockImplementation()
+    getInputMock = vi.spyOn(core, 'getInput').mockImplementation(() => '')
   })
 
   it('returns correct value', () => {

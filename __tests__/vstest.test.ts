@@ -1,10 +1,10 @@
-import { vi, describe, it, expect, beforeEach } from 'vitest'
+import { vi, describe, it, expect, beforeEach, type MockInstance } from 'vitest'
 import * as exec from '@actions/exec'
-import { Default, Inputs } from '../src/inputs'
-import * as path from '../src/path'
-import * as powershell from '../src/powershell'
-import * as sut from '../src/vstest'
-import * as find from '../src/find'
+import { Default, Inputs } from '../src/inputs.js'
+import * as path from '../src/path.js'
+import * as powershell from '../src/powershell.js'
+import * as sut from '../src/vstest.js'
+import * as find from '../src/find.js'
 
 vi.mock('@actions/exec', () => ({
   exec: vi.fn().mockResolvedValue(undefined)
@@ -12,10 +12,10 @@ vi.mock('@actions/exec', () => ({
 
 const SolutionFolder = path.join(__dirname, './__solution__')
 
-let execMock: ReturnType<typeof vi.spyOn>
-let expandArchiveMock: ReturnType<typeof vi.spyOn>
-let findMock: ReturnType<typeof vi.spyOn>
-let invokeWebRequestMock: ReturnType<typeof vi.spyOn>
+let execMock: MockInstance<typeof exec.exec>
+let expandArchiveMock: MockInstance<typeof powershell.expandArchive>
+let findMock: MockInstance<typeof find.find>
+let invokeWebRequestMock: MockInstance<typeof powershell.invokeWebRequest>
 
 describe('downloadTestTools()', () => {
   beforeEach(() => {
@@ -23,10 +23,10 @@ describe('downloadTestTools()', () => {
 
     expandArchiveMock = vi
       .spyOn(powershell, 'expandArchive')
-      .mockImplementation()
+      .mockImplementation(async () => {})
     invokeWebRequestMock = vi
       .spyOn(powershell, 'invokeWebRequest')
-      .mockImplementation()
+      .mockImplementation(async () => {})
   })
 
   it('returns path to vstest.console.exe', async () => {
@@ -177,7 +177,11 @@ describe('getVsTestPath()', () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
-    findMock = vi.spyOn(find, 'find').mockImplementation()
+    findMock = vi.spyOn(find, 'find').mockImplementation(async () => ({
+      directories: [],
+      files: [],
+      searchPaths: []
+    }))
   })
 
   it('finds returns empty string', async () => {

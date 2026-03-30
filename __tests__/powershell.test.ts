@@ -1,6 +1,6 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import * as exec from '@actions/exec'
-import * as sut from '../src/powershell'
+import * as sut from '../src/powershell.js'
 
 vi.mock('@actions/exec', () => ({
   exec: vi.fn().mockResolvedValue(undefined)

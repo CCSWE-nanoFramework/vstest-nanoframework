@@ -1,9 +1,9 @@
-import { vi, describe, it, expect, beforeEach } from 'vitest'
+import { vi, describe, it, expect, beforeEach, type MockInstance } from 'vitest'
 import { DefaultArtifactClient } from '@actions/artifact'
-import * as sut from '../src/artifact'
-import * as find from '../src/find'
+import * as sut from '../src/artifact.js'
+import * as find from '../src/find.js'
 
-let findMock: ReturnType<typeof vi.spyOn>
+let findMock: MockInstance<typeof find.find>
 
 vi.mock('@actions/artifact', () => {
   return {
@@ -32,7 +32,11 @@ describe('uploadArtifact()', () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
-    findMock = vi.spyOn(find, 'find').mockImplementation()
+    findMock = vi.spyOn(find, 'find').mockImplementation(async () => ({
+      directories: [],
+      files: [],
+      searchPaths: []
+    }))
 
     MockedArtifactClient.mockClear()
   })
