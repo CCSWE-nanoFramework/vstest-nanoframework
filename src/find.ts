@@ -2,6 +2,7 @@ import * as core from '@actions/core'
 import * as glob from '@actions/glob'
 import { stat } from 'fs'
 import { promisify } from 'util'
+import * as posixPath from 'path/posix'
 import * as path from './path.js'
 
 const statAsync = promisify(stat)
@@ -62,7 +63,9 @@ export function getSearchPath(searchPaths: string[]): string {
   for (const searchPath of searchPaths) {
     core.debug(`Using search path ${searchPath}`)
 
-    const splitSearchPath = path.normalize(searchPath).split(path.sep)
+    const splitSearchPath = posixPath
+      .normalize(searchPath.replace(/\\/g, '/'))
+      .split('/')
 
     // keep track of the smallest path length so that we don't accidentally later go out of bounds
     smallestPathLength = Math.min(smallestPathLength, splitSearchPath.length)
@@ -96,5 +99,5 @@ export function getSearchPath(searchPaths: string[]): string {
     commonPaths.push(splitPaths[0][splitIndex])
     splitIndex++
   }
-  return path.join(...commonPaths)
+  return posixPath.join(...commonPaths)
 }

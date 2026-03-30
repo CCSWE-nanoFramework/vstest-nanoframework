@@ -24,7 +24,8 @@ export default [
       '**/node_modules/',
       '**/*.json',
       'eslint.config.mjs',
-      'babel.config.js'
+      'babel.config.js',
+      'vitest.config.ts'
     ]
   },
   ...compat.extends(
@@ -61,7 +62,9 @@ export default [
       'eslint-comments/no-unused-disable': 'off',
       'filenames/match-regex': 'off',
       'i18n-text/no-en': 'off',
+      'import/named': 'off',
       'import/no-namespace': 'off',
+      'import/no-unresolved': 'off',
       'no-console': 'off',
       'no-shadow': 'off',
       'no-unused-vars': 'off',

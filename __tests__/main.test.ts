@@ -13,15 +13,10 @@ vi.mock('@actions/core', () => ({
   warning: vi.fn()
 }))
 
-let downloadTestToolsMock: ReturnType<typeof vi.spyOn>
-let getActionInputsMock: ReturnType<typeof vi.spyOn>
 let getRunSettingsMock: ReturnType<typeof vi.spyOn>
 let getTestAdaptersMock: ReturnType<typeof vi.spyOn>
-let getTestArgumentsMock: ReturnType<typeof vi.spyOn>
 let getTestAssembliesMock: ReturnType<typeof vi.spyOn>
-let getVsTestPathMock: ReturnType<typeof vi.spyOn>
 let setFailedMock: ReturnType<typeof vi.spyOn>
-let runTestsMock: ReturnType<typeof vi.spyOn>
 let uploadArtifactMock: ReturnType<typeof vi.spyOn>
 let warningMock: ReturnType<typeof vi.spyOn>
 
@@ -40,29 +35,23 @@ describe('run()', () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
-    downloadTestToolsMock = vi
-      .spyOn(vstest, 'downloadTestTools')
-      .mockResolvedValue('vstest.console.exe')
-    getActionInputsMock = vi
-      .spyOn(inputs, 'getActionInputs')
-      .mockReturnValue(inputsMock)
+    vi.spyOn(vstest, 'downloadTestTools').mockResolvedValue(
+      'vstest.console.exe'
+    )
+    vi.spyOn(inputs, 'getActionInputs').mockReturnValue(inputsMock)
     getRunSettingsMock = vi
       .spyOn(vstest, 'getRunSettings')
       .mockResolvedValue(['runSettings1'])
     getTestAdaptersMock = vi
       .spyOn(vstest, 'getTestAdapters')
       .mockResolvedValue(['testAdapter1'])
-    getTestArgumentsMock = vi
-      .spyOn(vstest, 'getTestArguments')
-      .mockReturnValue('')
+    vi.spyOn(vstest, 'getTestArguments').mockReturnValue('')
     getTestAssembliesMock = vi
       .spyOn(vstest, 'getTestAssemblies')
       .mockResolvedValue(['assembly1'])
-    getVsTestPathMock = vi
-      .spyOn(vstest, 'getVsTestPath')
-      .mockResolvedValue('')
+    vi.spyOn(vstest, 'getVsTestPath').mockResolvedValue('')
     setFailedMock = vi.spyOn(core, 'setFailed').mockImplementation(() => {})
-    runTestsMock = vi.spyOn(vstest, 'runTests').mockResolvedValue(undefined)
+    vi.spyOn(vstest, 'runTests').mockResolvedValue(undefined)
     uploadArtifactMock = vi
       .spyOn(artifact, 'uploadArtifact')
       .mockResolvedValue(undefined)

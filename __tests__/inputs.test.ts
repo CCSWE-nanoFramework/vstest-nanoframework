@@ -12,9 +12,7 @@ describe('getActionInputs()', () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
-    getBooleanInputMock = vi
-      .spyOn(core, 'getBooleanInput')
-      .mockImplementation()
+    getBooleanInputMock = vi.spyOn(core, 'getBooleanInput').mockImplementation()
     getInputMock = vi.spyOn(core, 'getInput').mockImplementation()
   })
 
@@ -59,9 +57,7 @@ describe('getBooleanInput()', () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
-    getBooleanInputMock = vi
-      .spyOn(core, 'getBooleanInput')
-      .mockImplementation()
+    getBooleanInputMock = vi.spyOn(core, 'getBooleanInput').mockImplementation()
   })
 
   it('returns correct value', () => {

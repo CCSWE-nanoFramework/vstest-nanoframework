@@ -1,15 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import * as exec from '@actions/exec'
-
-vi.mock('@actions/exec', () => ({
-  exec: vi.fn().mockResolvedValue(undefined)
-}))
 import { Default, Inputs } from '../src/inputs'
 import * as path from '../src/path'
 import * as powershell from '../src/powershell'
 import * as sut from '../src/vstest'
 import * as find from '../src/find'
+
+vi.mock('@actions/exec', () => ({
+  exec: vi.fn().mockResolvedValue(undefined)
+}))
 
 const SolutionFolder = path.join(__dirname, './__solution__')
 
