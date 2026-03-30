@@ -18,5 +18,11 @@
     "useUnknownInCatchVariables": false,
     "isolatedModules": true
   },
-  "exclude": ["./dist", "./node_modules", "./__tests__", "./coverage", "./vitest.config.ts"]
+  "exclude": [
+    "./dist",
+    "./node_modules",
+    "./__tests__",
+    "./coverage",
+    "./vitest.config.ts"
+  ]
 }
