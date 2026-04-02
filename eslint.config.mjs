@@ -56,6 +56,14 @@ export default [
       }
     },
 
+    settings: {
+      'import/resolver': {
+        typescript: {
+          alwaysTryTypes: true
+        }
+      }
+    },
+
     rules: {
       camelcase: 'off',
       'eslint-comments/no-use': 'off',

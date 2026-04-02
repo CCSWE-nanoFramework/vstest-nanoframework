@@ -7,7 +7,7 @@ let findMock: MockInstance<typeof find.find>
 
 vi.mock('@actions/artifact', () => {
   return {
-    DefaultArtifactClient: vi.fn().mockImplementation(() => {
+    DefaultArtifactClient: vi.fn().mockImplementation(function () {
       return {
         uploadArtifact: (name: string) => {
           switch (name) {
