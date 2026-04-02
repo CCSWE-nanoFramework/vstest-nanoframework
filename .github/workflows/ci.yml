@@ -46,7 +46,7 @@ jobs:
 
   test-action:
     name: GitHub Actions Test
-    runs-on: windows-2022
+    runs-on: windows-latest
     env:
       BUILD_CONFIGURATION: 'Release'
       GITHUB_TOKEN: ${{ github.token }}
