@@ -39,7 +39,7 @@ action.
 | `otherConsoleOptions`   |                                                | `string`  | Other options that can be passed to vstest.console.exe                                                                                                                                            |
 | `platform`              |                                                | `string`  | Build platform against which the tests should be reported. Valid values are: `x86`, `x64`, and `ARM`                                                                                              |
 | `artifactName`          | `vstest-results`                               | `string`  | Test result artifact name                                                                                                                                                                         |
-| `artifactRetentionDays` |                                                | `number`  | Duration after which artifact will expire in days. 0 means using default retention. Minimum 1 day. Maximum 90 days unless changed from the repository settings page.                             |
+| `artifactRetentionDays` |                                                | `number`  | Duration after which artifact will expire in days. 0 means using default retention. Minimum 1 day. Maximum 90 days unless changed from the repository settings page.                              |
 
 ## Outputs
 
