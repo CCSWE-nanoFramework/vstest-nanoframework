@@ -60,7 +60,7 @@
     "@typescript-eslint/parser": "^8.46.1",
     "@vercel/ncc": "^0.38.4",
     "@vitest/coverage-v8": "^4.1.2",
-    "eslint": "^9.39.0",
+    "eslint": "^10.2.0",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-github": "^5.1.8",
     "eslint-plugin-import": "^2.32.0",
@@ -75,6 +75,7 @@
   },
   "overrides": {
     "eslint": "$eslint",
+    "eslint-plugin-eslint-comments": "npm:@eslint-community/eslint-plugin-eslint-comments@latest",
     "prettier-eslint": {
       "minimatch": ">=9.0.7"
     }
