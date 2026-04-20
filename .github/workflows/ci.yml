@@ -72,7 +72,7 @@ jobs:
           msbuild-architecture: x64
 
       - name: Setup NuGet
-        uses: nuget/setup-nuget@v3
+        uses: nuget/setup-nuget@v4
 
       - name: Install dependencies
         run: nuget restore ${{ env.SOLUTION_FOLDER }}${{ env.SOLUTION }}
