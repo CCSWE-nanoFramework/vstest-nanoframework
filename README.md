@@ -75,8 +75,8 @@ With a runsettings file, parallel execution, and code coverage:
 
 Releases are tag-driven. To cut a release:
 
-1. Make sure `master` is green and `dist/` is committed and up to date (`npm run
-   bundle` produces no diff — CI enforces this).
+1. Make sure `master` is green and `dist/` is committed and up to date
+   (`npm run bundle` produces no diff — CI enforces this).
 2. Create and push a `vMAJOR.MINOR.PATCH` tag:
 
    ```bash
