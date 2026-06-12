@@ -79,5 +79,8 @@
     "prettier-eslint": {
       "minimatch": ">=9.0.7"
     }
+  },
+  "allowScripts": {
+    "unrs-resolver@1.12.2": true
   }
 }
