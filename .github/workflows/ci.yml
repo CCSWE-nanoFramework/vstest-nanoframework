@@ -60,7 +60,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup nanoFramework
-        uses: CCSWE-nanoFramework/actions-nanoframework/setup-nanoframework@master
+        uses: CCSWE-nanoFramework/actions-nanoframework/setup-nanoframework@chore/nanobuild-v1
 
       - name: Build solution
         uses: CCSWE-nanoFramework/actions-nanoframework/build-nanoframework@master
