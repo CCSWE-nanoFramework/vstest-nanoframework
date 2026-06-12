@@ -48,7 +48,6 @@ jobs:
     name: GitHub Actions Test
     runs-on: windows-latest
     env:
-      BUILD_CONFIGURATION: 'Release'
       GITHUB_TOKEN: ${{ github.token }}
       SOLUTION_FOLDER: './solution/'
       SOLUTION: 'VsTestAction.sln'
@@ -61,26 +60,12 @@ jobs:
           fetch-depth: 0
 
       - name: Setup nanoFramework
-        uses: nanoframework/nanobuild@v1
-
-      - name: Update nanoclr
-        run: dotnet tool update -g nanoclr
-
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v3
-        with:
-          msbuild-architecture: x64
-
-      - name: Setup NuGet
-        uses: nuget/setup-nuget@v4
-
-      - name: Install dependencies
-        run: nuget restore ${{ env.SOLUTION_FOLDER }}${{ env.SOLUTION }}
+        uses: CCSWE-nanoFramework/actions-nanoframework/setup-nanoframework@master
 
       - name: Build solution
-        run:
-          msbuild ${{ env.SOLUTION_FOLDER }}${{ env.SOLUTION }}
-          /p:Configuration=${{ env.BUILD_CONFIGURATION }}
+        uses: CCSWE-nanoFramework/actions-nanoframework/build-nanoframework@master
+        with:
+          solution: ${{ env.SOLUTION_FOLDER }}${{ env.SOLUTION }}
 
       - name: Test Local Action
         id: test-action
