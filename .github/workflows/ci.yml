@@ -60,12 +60,10 @@ jobs:
           fetch-depth: 0
 
       - name: Setup nanoFramework
-        # Temporarily pointed at the composites branch for validation; flip to
-        # @master once CCSWE-nanoFramework/actions-nanoframework#1 merges.
-        uses: CCSWE-nanoFramework/actions-nanoframework/setup-nanoframework@feature/composite-actions
+        uses: CCSWE-nanoFramework/actions-nanoframework/setup-nanoframework@master
 
       - name: Build solution
-        uses: CCSWE-nanoFramework/actions-nanoframework/build-nanoframework@feature/composite-actions
+        uses: CCSWE-nanoFramework/actions-nanoframework/build-nanoframework@master
         with:
           solution: ${{ env.SOLUTION_FOLDER }}${{ env.SOLUTION }}
 
