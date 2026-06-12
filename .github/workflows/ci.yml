@@ -48,7 +48,6 @@ jobs:
     name: GitHub Actions Test
     runs-on: windows-latest
     env:
-      BUILD_CONFIGURATION: 'Release'
       GITHUB_TOKEN: ${{ github.token }}
       SOLUTION_FOLDER: './solution/'
       SOLUTION: 'VsTestAction.sln'
@@ -61,30 +60,14 @@ jobs:
           fetch-depth: 0
 
       - name: Setup nanoFramework
-        # Pinned to the merge commit of nanoframework/nanobuild#4 (VS2026 support)
-        # until a tagged release is available; revert to @v1 once released.
-        uses: nanoframework/nanobuild@7c31aa93121b2f6fc97b3ce74655cc48b2c2c505
-        with:
-          gitHubAuth: ${{ github.token }}
-
-      - name: Update nanoclr
-        run: dotnet tool update -g nanoclr
-
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v3
-        with:
-          msbuild-architecture: x64
-
-      - name: Setup NuGet
-        uses: nuget/setup-nuget@v4
-
-      - name: Install dependencies
-        run: nuget restore ${{ env.SOLUTION_FOLDER }}${{ env.SOLUTION }}
+        # Temporarily pointed at the composites branch for validation; flip to
+        # @master once CCSWE-nanoFramework/actions-nanoframework#1 merges.
+        uses: CCSWE-nanoFramework/actions-nanoframework/setup-nanoframework@feature/composite-actions
 
       - name: Build solution
-        run:
-          msbuild ${{ env.SOLUTION_FOLDER }}${{ env.SOLUTION }}
-          /p:Configuration=${{ env.BUILD_CONFIGURATION }}
+        uses: CCSWE-nanoFramework/actions-nanoframework/build-nanoframework@feature/composite-actions
+        with:
+          solution: ${{ env.SOLUTION_FOLDER }}${{ env.SOLUTION }}
 
       - name: Test Local Action
         id: test-action
