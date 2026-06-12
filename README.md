@@ -70,3 +70,30 @@ With a runsettings file, parallel execution, and code coverage:
     artifactName: 'unit_test_results'
     artifactRetentionDays: 7
 ```
+
+## Releasing
+
+Releases are tag-driven. To cut a release:
+
+1. Make sure `master` is green and `dist/` is committed and up to date (`npm run
+   bundle` produces no diff — CI enforces this).
+2. Create and push a `vMAJOR.MINOR.PATCH` tag:
+
+   ```bash
+   git tag v1.0.13
+   git push origin v1.0.13
+   ```
+
+The [`Release`](.github/workflows/release.yml) workflow then re-runs
+format/lint/test, re-verifies the committed `dist/`, creates a GitHub Release
+with auto-generated (categorized) notes, and moves the major tag (`v1`) to the
+new release.
+
+For a prerelease, include a hyphen (e.g. `v1.1.0-beta.1`): the release is marked
+**pre-release** and the major `v1` tag is **not** moved.
+
+Consumers keep referencing the major tag:
+
+```yaml
+- uses: CCSWE-nanoFramework/vstest-nanoframework@v1
+```
