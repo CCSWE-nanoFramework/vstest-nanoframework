@@ -61,7 +61,9 @@ jobs:
           fetch-depth: 0
 
       - name: Setup nanoFramework
-        uses: CoryCharlton/nanobuild@fix/support-vs2026
+        # Pinned to the merge commit of nanoframework/nanobuild#4 (VS2026 support)
+        # until a tagged release is available; revert to @v1 once released.
+        uses: nanoframework/nanobuild@7c31aa93121b2f6fc97b3ce74655cc48b2c2c505
         with:
           gitHubAuth: ${{ github.token }}
 
