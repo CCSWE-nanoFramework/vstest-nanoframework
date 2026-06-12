@@ -62,6 +62,8 @@ jobs:
 
       - name: Setup nanoFramework
         uses: nanoframework/nanobuild@v1
+        with:
+          gitHubAuth: ${{ github.token }}
 
       - name: Update nanoclr
         run: dotnet tool update -g nanoclr
