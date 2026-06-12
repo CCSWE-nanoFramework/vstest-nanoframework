@@ -61,7 +61,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup nanoFramework
-        uses: nanoframework/nanobuild@v1
+        uses: CoryCharlton/nanobuild@fix/support-vs2026
         with:
           gitHubAuth: ${{ github.token }}
 
