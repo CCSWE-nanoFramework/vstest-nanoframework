@@ -1,0 +1,99 @@
+name: Release
+
+on:
+  push:
+    tags:
+      # Two-dot shape: matches v1.0.13 and v1.0.13-beta; excludes the bare
+      # major tag `v1` (no dots) so moving it does not re-trigger this workflow.
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build, verify dist, and publish release
+    runs-on: ubuntu-latest
+    outputs:
+      major: ${{ steps.major.outputs.major }}
+      prerelease: ${{ steps.major.outputs.prerelease }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check format
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run ci-test
+
+      - name: Build dist/
+        run: npm run bundle
+
+      # Mirrors check-dist.yml: fail if the committed dist/ is stale so a tag
+      # never ships out-of-date transpiled code.
+      - name: Verify dist/ is in sync
+        run: |
+          if [ ! -d dist/ ]; then
+            echo "Expected dist/ directory does not exist."
+            ls -la ./
+            exit 1
+          fi
+          if [ "$(git diff --ignore-space-at-eol --text dist/ | wc -l)" -gt "0" ]; then
+            echo "Committed dist/ is out of date with src/. Run 'npm run bundle' and commit before tagging."
+            git diff --ignore-space-at-eol --text dist/
+            exit 1
+          fi
+
+      - name: Compute major version and prerelease flag
+        id: major
+        run: |
+          ref="${GITHUB_REF_NAME}"          # e.g. v1.0.13 or v1.0.13-beta.1
+          echo "major=${ref%%.*}" >> "$GITHUB_OUTPUT"   # -> v1
+          if [[ "${ref}" == *-* ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          args=("${GITHUB_REF_NAME}" --generate-notes --title "${GITHUB_REF_NAME}")
+          if [[ "${GITHUB_REF_NAME}" == *-* ]]; then
+            args+=(--prerelease)
+          fi
+          gh release create "${args[@]}"
+
+  update-major-version:
+    name: Move major tag (${{ needs.release.outputs.major }})
+    needs: release
+    # Never move the major tag to a prerelease.
+    if: ${{ needs.release.outputs.prerelease == 'false' }}
+    permissions:
+      contents: write
+    uses: ./.github/workflows/update-main-version.yml
+    with:
+      target: ${{ github.ref_name }}
+      major_version: ${{ needs.release.outputs.major }}
+    secrets: inherit
