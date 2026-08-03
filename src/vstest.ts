@@ -104,19 +104,73 @@ export async function getTestAssemblies(inputs: Inputs): Promise<string[]> {
   return testAssemblies.files
 }
 
-export async function getVsTestPath(): Promise<string> {
-  // TODO: Don't hardcode a specific version but glob on that as well and find the highest
-  let vsTestFindResult = await find(
-    'C:\\Program Files\\Microsoft Visual Studio\\2022\\*\\Common7\\IDE\\CommonExtensions\\Microsoft\\TestWindow\\vstest.console.exe'
+const VsTestSubPath =
+  'Common7\\IDE\\CommonExtensions\\Microsoft\\TestWindow\\vstest.console.exe'
+
+// vswhere.exe ships with every Visual Studio install since 2017 and reports
+// install locations regardless of the folder VS chose (2019, 2022, 18, ...) or
+// the drive it was installed to.
+async function getVsInstallPaths(): Promise<string[]> {
+  const vsWhere = path.join(
+    process.env['ProgramFiles(x86)'] ?? '',
+    'Microsoft Visual Studio',
+    'Installer',
+    'vswhere.exe'
   )
 
-  if (vsTestFindResult.files.length <= 0) {
-    vsTestFindResult = await find(
-      'C:\\Program Files\\Microsoft Visual Studio\\2019\\*\\Common7\\IDE\\CommonExtensions\\Microsoft\\TestWindow\\vstest.console.exe'
+  try {
+    const result = await exec.getExecOutput(
+      vsWhere,
+      ['-all', '-products', '*', '-property', 'installationPath'],
+      { ignoreReturnCode: true, silent: true }
     )
+
+    if (result.exitCode !== 0) {
+      core.debug(`vswhere.exe exited with code ${result.exitCode}`)
+      return []
+    }
+
+    return result.stdout
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0)
+  } catch {
+    core.debug(`vswhere.exe not available at ${vsWhere}`)
+    return []
+  }
+}
+
+// Searched in order when vswhere is unavailable. Known versions are listed
+// newest first so the preferred install wins; the trailing wildcard still
+// matches all of them, but only after the explicit ordering has been applied,
+// and catches future releases.
+const VsFallbackRoots = [
+  'C:\\Program Files\\Microsoft Visual Studio\\18\\*',
+  'C:\\Program Files\\Microsoft Visual Studio\\2022\\*',
+  'C:\\Program Files\\Microsoft Visual Studio\\2019\\*',
+  'C:\\Program Files\\Microsoft Visual Studio\\*\\*'
+]
+
+export async function getVsTestPath(): Promise<string> {
+  for (const installPath of await getVsInstallPaths()) {
+    core.debug(`Searching Visual Studio install at ${installPath}`)
+
+    const vsTestFindResult = await find(path.join(installPath, VsTestSubPath))
+
+    if (vsTestFindResult.files.length > 0) {
+      return vsTestFindResult.files[0]
+    }
   }
 
-  return vsTestFindResult.files.length > 0 ? vsTestFindResult.files[0] : ''
+  for (const root of VsFallbackRoots) {
+    const vsTestFindResult = await find(`${root}\\${VsTestSubPath}`)
+
+    if (vsTestFindResult.files.length > 0) {
+      return vsTestFindResult.files[0]
+    }
+  }
+
+  return ''
 }
 
 // TODO: This should move somewhere else

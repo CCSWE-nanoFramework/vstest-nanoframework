@@ -7,7 +7,12 @@ import * as sut from '../src/vstest.js'
 import * as find from '../src/find.js'
 
 vi.mock('@actions/exec', () => ({
-  exec: vi.fn().mockResolvedValue(undefined)
+  exec: vi.fn().mockResolvedValue(undefined),
+  // Default to a non-zero exit so tests fall through to the glob fallbacks
+  // unless they opt into a vswhere result.
+  getExecOutput: vi
+    .fn()
+    .mockResolvedValue({ exitCode: 1, stdout: '', stderr: '' })
 }))
 
 const SolutionFolder = path.join(__dirname, './__solution__')
@@ -210,6 +215,63 @@ describe('getVsTestPath()', () => {
     const results = await sut.getVsTestPath()
 
     expect(results).toBe('file1')
+  })
+
+  it('searches the install path reported by vswhere', async () => {
+    const installPath =
+      'C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise'
+
+    vi.mocked(exec.getExecOutput).mockResolvedValue({
+      exitCode: 0,
+      stdout: `${installPath}\n`,
+      stderr: ''
+    })
+    findMock.mockImplementation(async () => ({
+      directories: [],
+      files: ['vstest.console.exe'],
+      searchPaths: []
+    }))
+
+    const results = await sut.getVsTestPath()
+
+    expect(results).toBe('vstest.console.exe')
+    expect(findMock).toHaveBeenCalledTimes(1)
+    expect(findMock).toHaveBeenCalledWith(expect.stringContaining(installPath))
+  })
+
+  it('falls back to the glob roots when vswhere finds nothing there', async () => {
+    vi.mocked(exec.getExecOutput).mockResolvedValue({
+      exitCode: 0,
+      stdout: 'C:\\Some\\Install\n',
+      stderr: ''
+    })
+    findMock
+      .mockImplementationOnce(async () => ({
+        directories: [],
+        files: [],
+        searchPaths: []
+      }))
+      .mockImplementation(async () => ({
+        directories: [],
+        files: ['fallback.exe'],
+        searchPaths: []
+      }))
+
+    const results = await sut.getVsTestPath()
+
+    expect(results).toBe('fallback.exe')
+  })
+
+  it('searches known versions newest first when vswhere is unavailable', async () => {
+    vi.mocked(exec.getExecOutput).mockRejectedValue(new Error('ENOENT'))
+
+    await sut.getVsTestPath()
+
+    const patterns = findMock.mock.calls.map(call => call[0])
+    expect(patterns[0]).toContain('\\18\\')
+    expect(patterns[1]).toContain('\\2022\\')
+    expect(patterns[2]).toContain('\\2019\\')
+    expect(patterns).toHaveLength(4)
   })
 })
 

@@ -81626,8 +81626,8 @@ function getExecOutput(commandLine, args, options) {
         let stdout = '';
         let stderr = '';
         //Using string decoder covers the case where a mult-byte character is split
-        const stdoutDecoder = new StringDecoder('utf8');
-        const stderrDecoder = new StringDecoder('utf8');
+        const stdoutDecoder = new external_string_decoder_.StringDecoder('utf8');
+        const stderrDecoder = new external_string_decoder_.StringDecoder('utf8');
         const originalStdoutListener = (_a = options === null || options === void 0 ? void 0 : options.listeners) === null || _a === void 0 ? void 0 : _a.stdout;
         const originalStdErrListener = (_b = options === null || options === void 0 ? void 0 : options.listeners) === null || _b === void 0 ? void 0 : _b.stderr;
         const stdErrListener = (data) => {
@@ -143034,13 +143034,53 @@ async function getTestAssemblies(inputs) {
     const testAssemblies = await find(pattern);
     return testAssemblies.files;
 }
-async function getVsTestPath() {
-    // TODO: Don't hardcode a specific version but glob on that as well and find the highest
-    let vsTestFindResult = await find('C:\\Program Files\\Microsoft Visual Studio\\2022\\*\\Common7\\IDE\\CommonExtensions\\Microsoft\\TestWindow\\vstest.console.exe');
-    if (vsTestFindResult.files.length <= 0) {
-        vsTestFindResult = await find('C:\\Program Files\\Microsoft Visual Studio\\2019\\*\\Common7\\IDE\\CommonExtensions\\Microsoft\\TestWindow\\vstest.console.exe');
+const VsTestSubPath = 'Common7\\IDE\\CommonExtensions\\Microsoft\\TestWindow\\vstest.console.exe';
+// vswhere.exe ships with every Visual Studio install since 2017 and reports
+// install locations regardless of the folder VS chose (2019, 2022, 18, ...) or
+// the drive it was installed to.
+async function getVsInstallPaths() {
+    const vsWhere = external_path_default().join(process.env['ProgramFiles(x86)'] ?? '', 'Microsoft Visual Studio', 'Installer', 'vswhere.exe');
+    try {
+        const result = await getExecOutput(vsWhere, ['-all', '-products', '*', '-property', 'installationPath'], { ignoreReturnCode: true, silent: true });
+        if (result.exitCode !== 0) {
+            core_debug(`vswhere.exe exited with code ${result.exitCode}`);
+            return [];
+        }
+        return result.stdout
+            .split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 0);
     }
-    return vsTestFindResult.files.length > 0 ? vsTestFindResult.files[0] : '';
+    catch {
+        core_debug(`vswhere.exe not available at ${vsWhere}`);
+        return [];
+    }
+}
+// Searched in order when vswhere is unavailable. Known versions are listed
+// newest first so the preferred install wins; the trailing wildcard still
+// matches all of them, but only after the explicit ordering has been applied,
+// and catches future releases.
+const VsFallbackRoots = [
+    'C:\\Program Files\\Microsoft Visual Studio\\18\\*',
+    'C:\\Program Files\\Microsoft Visual Studio\\2022\\*',
+    'C:\\Program Files\\Microsoft Visual Studio\\2019\\*',
+    'C:\\Program Files\\Microsoft Visual Studio\\*\\*'
+];
+async function getVsTestPath() {
+    for (const installPath of await getVsInstallPaths()) {
+        core_debug(`Searching Visual Studio install at ${installPath}`);
+        const vsTestFindResult = await find(external_path_default().join(installPath, VsTestSubPath));
+        if (vsTestFindResult.files.length > 0) {
+            return vsTestFindResult.files[0];
+        }
+    }
+    for (const root of VsFallbackRoots) {
+        const vsTestFindResult = await find(`${root}\\${VsTestSubPath}`);
+        if (vsTestFindResult.files.length > 0) {
+            return vsTestFindResult.files[0];
+        }
+    }
+    return '';
 }
 // TODO: This should move somewhere else
 function isValidPlatform(platform) {
