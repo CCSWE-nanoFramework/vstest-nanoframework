@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
-import { DefaultArtifactClient, UploadArtifactOptions } from '@actions/artifact'
+import { DefaultArtifactClient } from '@actions/artifact'
+import type { UploadArtifactOptions } from '@actions/artifact'
 import { find } from './find.js'
 
 export async function uploadArtifact(

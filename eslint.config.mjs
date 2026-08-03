@@ -71,7 +71,6 @@ export default [
       'eslint-comments/no-unused-disable': 'off',
       'filenames/match-regex': 'off',
       'i18n-text/no-en': 'off',
-      'import/named': 'off',
       'import/no-namespace': 'off',
       'no-console': 'off',
       'no-shadow': 'off',
