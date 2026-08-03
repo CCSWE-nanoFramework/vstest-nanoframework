@@ -142941,10 +142941,22 @@ const Default = new InputsImplementation();
 ;// CONCATENATED MODULE: ./src/powershell.ts
 
 async function expandArchive(path, destinationPath) {
-    await exec_exec(`powershell Expand-Archive -Path ${path} -DestinationPath ${destinationPath}`);
+    await exec_exec('powershell', [
+        'Expand-Archive',
+        '-Path',
+        path,
+        '-DestinationPath',
+        destinationPath
+    ]);
 }
 async function invokeWebRequest(uri, outFile) {
-    await exec_exec(`powershell Invoke-WebRequest -Uri "${uri}" -OutFile ${outFile}`);
+    await exec_exec('powershell', [
+        'Invoke-WebRequest',
+        '-Uri',
+        uri,
+        '-OutFile',
+        outFile
+    ]);
 }
 
 ;// CONCATENATED MODULE: ./src/vstest.ts

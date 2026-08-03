@@ -20,9 +20,13 @@ describe('expandArchive()', () => {
 
     await sut.expandArchive(path, destinationPath)
 
-    expect(execMock).toHaveBeenCalledWith(
-      `powershell Expand-Archive -Path ${path} -DestinationPath ${destinationPath}`
-    )
+    expect(execMock).toHaveBeenCalledWith('powershell', [
+      'Expand-Archive',
+      '-Path',
+      path,
+      '-DestinationPath',
+      destinationPath
+    ])
   })
 })
 
@@ -38,8 +42,12 @@ describe('invokeWebRequest()', () => {
 
     await sut.invokeWebRequest(uri, outFile)
 
-    expect(execMock).toHaveBeenCalledWith(
-      `powershell Invoke-WebRequest -Uri "${uri}" -OutFile ${outFile}`
-    )
+    expect(execMock).toHaveBeenCalledWith('powershell', [
+      'Invoke-WebRequest',
+      '-Uri',
+      uri,
+      '-OutFile',
+      outFile
+    ])
   })
 })
