@@ -21,6 +21,10 @@ jobs:
         id: checkout
         uses: actions/checkout@v7
 
+      - name: Check Node Version Files
+        id: node-version-files
+        run: cmp .node-version .nvmrc
+
       - name: Setup Node.js
         id: setup-node
         uses: actions/setup-node@v7
