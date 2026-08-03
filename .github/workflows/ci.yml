@@ -71,6 +71,26 @@ jobs:
         with:
           solution: ${{ env.SOLUTION_FOLDER }}${{ env.SOLUTION }}
 
+      # TEMPORARY diagnostic for issue #5 - do not merge.
+      - name: Probe VS layout
+        continue-on-error: true
+        run: |
+          Write-Host "=== VS install roots ==="
+          Get-ChildItem "C:\Program Files\Microsoft Visual Studio" -Directory -ErrorAction SilentlyContinue |
+            Select-Object -ExpandProperty FullName
+          Write-Host "=== vstest.console.exe anywhere under Program Files ==="
+          Get-ChildItem "C:\Program Files\Microsoft Visual Studio" -Recurse -Filter vstest.console.exe -ErrorAction SilentlyContinue |
+            Select-Object -ExpandProperty FullName
+          Write-Host "=== vswhere installationPath ==="
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          if (Test-Path $vswhere) {
+            & $vswhere -all -products * -property installationPath
+          } else {
+            Write-Host "vswhere.exe NOT FOUND at $vswhere"
+          }
+          Write-Host "=== exact path getVsTestPath globs ==="
+          Test-Path "C:\Program Files\Microsoft Visual Studio\2022\*\Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe"
+
       - name: Test Local Action
         id: test-action
         uses: ./
