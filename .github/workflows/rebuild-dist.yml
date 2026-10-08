@@ -1,0 +1,82 @@
+# Rebuilds dist/ and commits it back to the branch: automatically on Dependabot
+# PRs, on demand for any other branch.
+name: Rebuild dist/
+
+on:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rebuild-dist-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  rebuild-dist:
+    name: Rebuild dist/
+    if:
+      (github.event_name == 'pull_request' &&
+      github.event.pull_request.user.login == 'dependabot[bot]') ||
+      (github.event_name == 'workflow_dispatch' && github.ref_name !=
+      github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    env:
+      BRANCH: ${{ github.head_ref || github.ref_name }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ env.BRANCH }}
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build dist/ Directory
+        run: npm run bundle
+
+      - name: Check for Changes
+        id: changes
+        run: |
+          if [ -z "$(git status --porcelain dist/)" ]; then
+            echo "dist/ up to date"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Created after the build so dependency code never runs with the token.
+      - name: Create App Token
+        id: app-token
+        if: steps.changes.outputs.changed == 'true'
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_APP_KEY }}
+
+      # Pushed with the App token so the new commit triggers the checks.
+      - name: Commit and Push
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          user="${APP_SLUG}[bot]"
+          id="$(gh api "users/${user}" -q .id)"
+          git config user.name "${user}"
+          git config user.email "${id}+${user}@users.noreply.github.com"
+          git add dist/
+          git commit -m "Rebuild dist/"
+          git -c core.hooksPath=/dev/null push \
+            "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            "HEAD:${BRANCH}"
+        env:
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
