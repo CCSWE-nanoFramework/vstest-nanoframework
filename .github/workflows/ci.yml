@@ -114,3 +114,26 @@ jobs:
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
+
+  dependabot-update:
+    if:
+      github.event_name == 'push' && github.ref == format('refs/heads/{0}',
+      github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_APP_KEY }}
+
+      # A sibling merge leaves auto-merge Dependabot PRs behind base; update them so CI re-runs and they merge.
+      - run: |
+          gh pr list -R "$REPO" --author app/dependabot --state open --json number,mergeStateStatus,autoMergeRequest \
+            -q '.[] | select(.autoMergeRequest != null and .mergeStateStatus == "BEHIND") | .number' |
+            while read -r n; do gh pr update-branch "$n" -R "$REPO"; done
+        env:
+          REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
