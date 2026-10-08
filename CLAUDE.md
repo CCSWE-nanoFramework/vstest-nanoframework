@@ -68,7 +68,9 @@ npx vitest run __tests__/path/to/test.test.ts
 **Distribution**: The `dist/` directory contains the bundled single-file output
 (`dist/index.js`) checked into git. Always run `npm run bundle` before
 committing changes to source files — the `check-dist.yml` workflow will fail the
-PR if `dist/` is out of sync.
+PR if `dist/` is out of sync. `rebuild-dist.yml` rebuilds and commits `dist/`
+automatically on Dependabot PRs and on demand (`workflow_dispatch`) for any
+other branch.
 
 ## CI Constraints
 
