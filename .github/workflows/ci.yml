@@ -92,6 +92,9 @@ jobs:
     steps:
       - id: metadata
         uses: dependabot/fetch-metadata@v3
+        with:
+          # Branch updates by the merge step re-sign commits; the job already requires a dependabot[bot] PR.
+          skip-commit-verification: true
 
       - id: app-token
         if: steps.metadata.outputs.update-type != 'version-update:semver-major'
@@ -100,11 +103,14 @@ jobs:
           app-id: ${{ secrets.AUTOMATION_APP_ID }}
           private-key: ${{ secrets.AUTOMATION_APP_KEY }}
 
+      # Auto-merge waits for every required check; repos without branch protection can't use it, so merge directly.
+      # A branch behind base (strict checks) is updated; the re-run CI comes back here.
       - if: steps.metadata.outputs.update-type != 'version-update:semver-major'
-        # Behind base (strict required checks): rebase it; the re-run CI merges it.
-        run:
-          gh pr merge "$PR_URL" --squash || gh pr update-branch "$PR_URL"
-          --rebase
+        run: |
+          gh pr merge "$PR_URL" --squash --auto || gh pr merge "$PR_URL" --squash
+          if [ "$(gh pr view "$PR_URL" --json state,mergeStateStatus -q '.state + .mergeStateStatus')" = OPENBEHIND ]; then
+            gh pr update-branch "$PR_URL"
+          fi
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
