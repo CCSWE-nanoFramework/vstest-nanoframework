@@ -26,8 +26,8 @@ npm run package:watch # Watch mode for package building
 npm run lint          # Run ESLint
 npm run format:write  # Format code with Prettier
 npm run format:check  # Check formatting without writing
-npm run test          # Run Vitest unit tests
-npm run ci-test       # Run Vitest in CI mode
+npm run test          # Run Vitest with coverage
+npm run ci-test       # Run Vitest without coverage (used by CI)
 npm run coverage      # Generate coverage badge
 npm run all           # Full pipeline: format → lint → test → coverage → package
 ```
@@ -45,23 +45,19 @@ npx vitest run __tests__/path/to/test.test.ts
 **Execution flow** (all in `src/main.ts`):
 
 1. Parse action inputs (`src/inputs.ts`)
-2. Find test assemblies via glob (`src/find.ts`)
-3. Find test adapter DLL (`src/find.ts`)
+2. Find test assemblies via glob (`src/vstest.ts`)
+3. Find test adapter DLL (`src/vstest.ts`)
 4. Locate or download VSTest tools via NuGet (`src/vstest.ts`)
 5. Build `vstest.console.exe` arguments and execute (`src/vstest.ts`)
 6. Upload `.trx` test results as artifacts (`src/artifact.ts`)
 
 **Default input values** (important for understanding file search behavior):
-
-- `testAssemblies`: `**\bin\**\NFUnitTest.dll`
-- `testAdapter`: `**\packages\**\nanoFramework.TestAdapter.dll`
-- `solutionFolder`: `.\`
-- `artifactName`: `vstest-results`
+see `action.yml`, mirrored by `Default` in `src/inputs.ts`.
 
 **Key modules**:
 
 - `src/vstest.ts` — Core: finds assemblies/adapters/settings, downloads
-  Microsoft.TestPlatform v17.10.0 from NuGet, runs tests
+  Microsoft.TestPlatform from NuGet, runs tests
 - `src/inputs.ts` — Parses and validates all `action.yml` inputs
 - `src/find.ts` — File globbing using `@actions/glob`
 - `src/powershell.ts` — PowerShell helpers for expanding zip archives and
