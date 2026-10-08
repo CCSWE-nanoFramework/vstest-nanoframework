@@ -79,3 +79,32 @@ jobs:
           runSettings: ${{ env.SOLUTION_FOLDER }}NFUnitTest1/nano.runsettings
           artifactName: 'non-default-artifact-name'
           artifactRetentionDays: 1
+
+  dependabot-merge:
+    needs: [test-typescript, test-action]
+    if:
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - id: metadata
+        uses: dependabot/fetch-metadata@v3
+
+      - id: app-token
+        if: steps.metadata.outputs.update-type != 'version-update:semver-major'
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_APP_KEY }}
+
+      - if: steps.metadata.outputs.update-type != 'version-update:semver-major'
+        # Behind base (strict required checks): rebase it; the re-run CI merges it.
+        run:
+          gh pr merge "$PR_URL" --squash || gh pr update-branch "$PR_URL"
+          --rebase
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
