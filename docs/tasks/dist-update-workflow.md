@@ -11,6 +11,7 @@ Dependabot npm PRs (production and transitive bumps) and small source edits fail
    `AUTOMATION_APP_ID` / `AUTOMATION_APP_KEY`); pushes made with `GITHUB_TOKEN`
    don't trigger the follow-up checks, and Dependabot-triggered runs only see
    Dependabot secrets.
-3. Validate with `actionlint`, then exercise it on a Dependabot npm PR.
+3. Validate with `actionlint`, then exercise it on a Dependabot npm PR (#225,
+   brace-expansion, is open and failing `Check dist/` for this reason).
 
 Delete this file when done.
