@@ -11,7 +11,7 @@ export enum Input {
   SolutionFolder = 'solutionFolder',
   TestAdapter = 'testAdapter',
   TestAssemblies = 'testAssemblies',
-  VsTestArguments = 'vsTestArguments'
+  OtherConsoleOptions = 'otherConsoleOptions'
 }
 
 export interface Inputs {
@@ -25,7 +25,7 @@ export interface Inputs {
   solutionFolder?: string
   testAdapter?: string
   testAssemblies?: string
-  vsTestArguments?: string
+  otherConsoleOptions?: string
 }
 
 export function getActionInputs(): Inputs {
@@ -55,9 +55,9 @@ export function getActionInputs(): Inputs {
       Input.TestAssemblies,
       Default.testAssemblies
     ),
-    vsTestArguments: getStringInput(
-      Input.VsTestArguments,
-      Default.vsTestArguments
+    otherConsoleOptions: getStringInput(
+      Input.OtherConsoleOptions,
+      Default.otherConsoleOptions
     )
   }
 }
@@ -112,7 +112,7 @@ class InputsImplementation implements Inputs {
   solutionFolder = '.\\'
   testAdapter = '**\\packages\\**\\nanoFramework.TestAdapter.dll'
   testAssemblies = '**\\bin\\**\\NFUnitTest.dll'
-  vsTestArguments = ''
+  otherConsoleOptions = ''
 }
 
 export const Default = new InputsImplementation()

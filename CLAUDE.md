@@ -51,8 +51,8 @@ npx vitest run __tests__/path/to/test.test.ts
 5. Build `vstest.console.exe` arguments and execute (`src/vstest.ts`)
 6. Upload `.trx` test results as artifacts (`src/artifact.ts`)
 
-**Default input values** (important for understanding file search behavior):
-see `action.yml`, mirrored by `Default` in `src/inputs.ts`.
+**Default input values** (important for understanding file search behavior): see
+`action.yml`, mirrored by `Default` in `src/inputs.ts`.
 
 **Key modules**:
 

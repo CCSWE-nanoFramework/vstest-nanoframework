@@ -28,7 +28,7 @@ const inputsMock: Inputs = {
   solutionFolder: 'solutionFolder',
   testAdapter: 'testAdapter',
   testAssemblies: 'testAssemblies',
-  vsTestArguments: 'vsTestArguments'
+  otherConsoleOptions: 'otherConsoleOptions'
 }
 
 describe('run()', () => {

@@ -29,7 +29,7 @@ describe('getActionInputs()', () => {
     expect(inputs.solutionFolder).toBe(Default.solutionFolder)
     expect(inputs.testAdapter).toBe(Default.testAdapter)
     expect(inputs.testAssemblies).toBe(Default.testAssemblies)
-    expect(inputs.vsTestArguments).toBe(Default.vsTestArguments)
+    expect(inputs.otherConsoleOptions).toBe(Default.otherConsoleOptions)
   })
 
   it('parses inputs', () => {
@@ -51,7 +51,7 @@ describe('getActionInputs()', () => {
     expect(inputs.solutionFolder).toBe(Input.SolutionFolder)
     expect(inputs.testAdapter).toBe(Input.TestAdapter)
     expect(inputs.testAssemblies).toBe(Input.TestAssemblies)
-    expect(inputs.vsTestArguments).toBe(Input.VsTestArguments)
+    expect(inputs.otherConsoleOptions).toBe(Input.OtherConsoleOptions)
   })
 })
 

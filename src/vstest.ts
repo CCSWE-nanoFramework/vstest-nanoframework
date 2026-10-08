@@ -80,8 +80,8 @@ export function getTestArguments(inputs: Inputs): string {
     args += `/Settings:${inputs.runSettings} `
   }
   // This one should come last
-  if (inputs.vsTestArguments) {
-    args += inputs.vsTestArguments
+  if (inputs.otherConsoleOptions) {
+    args += inputs.otherConsoleOptions
   }
   return args
 }

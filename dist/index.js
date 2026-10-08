@@ -142712,7 +142712,7 @@ var Input;
     Input["SolutionFolder"] = "solutionFolder";
     Input["TestAdapter"] = "testAdapter";
     Input["TestAssemblies"] = "testAssemblies";
-    Input["VsTestArguments"] = "vsTestArguments";
+    Input["OtherConsoleOptions"] = "otherConsoleOptions";
 })(Input || (Input = {}));
 function getActionInputs() {
     return {
@@ -142726,7 +142726,7 @@ function getActionInputs() {
         solutionFolder: getStringInput(Input.SolutionFolder, Default.solutionFolder),
         testAdapter: getStringInput(Input.TestAdapter, Default.testAdapter),
         testAssemblies: getStringInput(Input.TestAssemblies, Default.testAssemblies),
-        vsTestArguments: getStringInput(Input.VsTestArguments, Default.vsTestArguments)
+        otherConsoleOptions: getStringInput(Input.OtherConsoleOptions, Default.otherConsoleOptions)
     };
 }
 function inputs_getBooleanInput(name, defaultValue) {
@@ -142777,7 +142777,7 @@ class InputsImplementation {
     solutionFolder = '.\\';
     testAdapter = '**\\packages\\**\\nanoFramework.TestAdapter.dll';
     testAssemblies = '**\\bin\\**\\NFUnitTest.dll';
-    vsTestArguments = '';
+    otherConsoleOptions = '';
 }
 const Default = new InputsImplementation();
 
@@ -142860,8 +142860,8 @@ function getTestArguments(inputs) {
         args += `/Settings:${inputs.runSettings} `;
     }
     // This one should come last
-    if (inputs.vsTestArguments) {
-        args += inputs.vsTestArguments;
+    if (inputs.otherConsoleOptions) {
+        args += inputs.otherConsoleOptions;
     }
     return args;
 }

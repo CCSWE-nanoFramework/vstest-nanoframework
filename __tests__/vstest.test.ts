@@ -144,8 +144,8 @@ describe('getTestArguments()', () => {
     ['arg1 arg2', 'arg1 arg2'],
     ['', ''],
     [undefined, '']
-  ])(`handles 'vsTestArguments' %s`, (test, expected) => {
-    expect(sut.getTestArguments({ vsTestArguments: test })).toBe(expected)
+  ])(`handles 'otherConsoleOptions' %s`, (test, expected) => {
+    expect(sut.getTestArguments({ otherConsoleOptions: test })).toBe(expected)
   })
 })
 
