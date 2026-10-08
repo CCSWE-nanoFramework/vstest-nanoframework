@@ -11,7 +11,7 @@ and attached as a `.trx` artifact.
 Your workflow must set up the following before using this action:
 
 ```yaml
-- uses: actions/checkout@v6
+- uses: actions/checkout@v7
   with:
     fetch-depth: 0
 
@@ -19,7 +19,7 @@ Your workflow must set up the following before using this action:
 
 - uses: microsoft/setup-msbuild@v3
 
-- uses: nuget/setup-nuget@v3
+- uses: nuget/setup-nuget@v4
 ```
 
 After setup, restore NuGet packages and build your solution before running this
@@ -27,19 +27,19 @@ action.
 
 ## Inputs
 
-| Name                    | Default                                        | Type      | Description                                                                                                                                                                                       |
-| ----------------------- | ---------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `testAssemblies`        | `**\bin\**\NFUnitTest.dll`                     | `string`  | Glob pattern for test assembly files to run                                                                                                                                                       |
-| `solutionFolder`        | `.\`                                           | `string`  | Folder to search for the test assemblies and test adapter                                                                                                                                         |
-| `testAdapter`           | `**\packages\**\nanoFramework.TestAdapter.dll` | `string`  | Glob pattern for the test adapter assembly                                                                                                                                                        |
-| `runSettings`           |                                                | `string`  | Path to runsettings or testsettings file to use with the tests                                                                                                                                    |
-| `runInParallel`         | `false`                                        | `boolean` | If set, tests will run in parallel leveraging available cores of the machine. This will override the MaxCpuCount if specified in your runsettings file. Valid values are: `true` and `false`      |
-| `runInIsolation`        | `false`                                        | `boolean` | Runs the tests in an isolated process. This makes vstest.console.exe process less likely to be stopped on an error in the tests, but tests might run slower. Valid values are: `true` and `false` |
-| `enableCodeCoverage`    | `false`                                        | `boolean` | Collect code coverage information from the test run                                                                                                                                               |
-| `otherConsoleOptions`   |                                                | `string`  | Other options that can be passed to vstest.console.exe                                                                                                                                            |
-| `platform`              |                                                | `string`  | Build platform against which the tests should be reported. Valid values are: `x86`, `x64`, and `ARM`                                                                                              |
-| `artifactName`          | `vstest-results`                               | `string`  | Test result artifact name                                                                                                                                                                         |
-| `artifactRetentionDays` |                                                | `number`  | Duration after which artifact will expire in days. 0 means using default retention. Minimum 1 day. Maximum 90 days unless changed from the repository settings page.                              |
+| Name                    | Required | Default                                        | Type      | Description                                                                                                                                                                                       |
+| ----------------------- | -------- | ---------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `testAssemblies`        | yes      | `**\bin\**\NFUnitTest.dll`                     | `string`  | Glob pattern for test assembly files to run                                                                                                                                                       |
+| `solutionFolder`        | yes      | `.\`                                           | `string`  | Folder to search for the test assemblies and test adapter                                                                                                                                         |
+| `testAdapter`           | yes      | `**\packages\**\nanoFramework.TestAdapter.dll` | `string`  | Glob pattern for the test adapter assembly                                                                                                                                                        |
+| `runSettings`           | no       |                                                | `string`  | Path to runsettings or testsettings file to use with the tests. If not set, `solutionFolder` is searched for `nano.runsettings`; the action fails if none is found                                |
+| `runInParallel`         | no       | `false`                                        | `boolean` | If set, tests will run in parallel leveraging available cores of the machine. This will override the MaxCpuCount if specified in your runsettings file. Valid values are: `true` and `false`      |
+| `runInIsolation`        | no       | `false`                                        | `boolean` | Runs the tests in an isolated process. This makes vstest.console.exe process less likely to be stopped on an error in the tests, but tests might run slower. Valid values are: `true` and `false` |
+| `enableCodeCoverage`    | no       | `false`                                        | `boolean` | Collect code coverage information from the test run                                                                                                                                               |
+| `otherConsoleOptions`   | no       |                                                | `string`  | Other options that can be passed to vstest.console.exe                                                                                                                                            |
+| `platform`              | no       |                                                | `string`  | Build platform against which the tests should be reported. Valid values are: `x86`, `x64`, and `ARM`                                                                                              |
+| `artifactName`          | yes      | `vstest-results`                               | `string`  | Test result artifact name                                                                                                                                                                         |
+| `artifactRetentionDays` | no       |                                                | `number`  | Duration after which artifact will expire in days. 0 means using default retention. Minimum 1 day. Maximum 90 days unless changed from the repository settings page.                              |
 
 ## Outputs
 
@@ -80,8 +80,8 @@ Releases are tag-driven. To cut a release:
 2. Create and push a `vMAJOR.MINOR.PATCH` tag:
 
    ```bash
-   git tag v1.0.13
-   git push origin v1.0.13
+   git tag vX.Y.Z
+   git push origin vX.Y.Z
    ```
 
 The [`Release`](.github/workflows/release.yml) workflow then re-runs

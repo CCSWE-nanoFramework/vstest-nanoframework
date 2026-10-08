@@ -1,5 +1,5 @@
 name: 'vstest-nanoframework'
-description: 'Runs VSTest and upload result logs'
+description: 'Runs VSTest and uploads result logs'
 author: 'CCSWE'
 
 branding:
@@ -25,7 +25,9 @@ inputs:
 
   runSettings:
     description:
-      'Path to runsettings or testsettings file to use with the tests'
+      'Path to runsettings or testsettings file to use with the tests. If not
+      set, `solutionFolder` is searched for `nano.runsettings`; the action fails
+      if none is found'
     required: false
 
   runInParallel:
