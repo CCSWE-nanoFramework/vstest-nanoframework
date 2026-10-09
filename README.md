@@ -92,6 +92,12 @@ new release.
 For a prerelease, include a hyphen (e.g. `v1.1.0-beta.1`): the release is marked
 **pre-release** and the major `v1` tag is **not** moved.
 
+Runtime dependency fixes (including Dependabot security updates) are bundled
+into `dist/`, so they only reach consumers once released.
+
+To point `v1` at another tag by hand (e.g. a rollback), run the
+[`Update Main Version`](.github/workflows/update-main-version.yml) workflow.
+
 Consumers keep referencing the major tag:
 
 ```yaml
