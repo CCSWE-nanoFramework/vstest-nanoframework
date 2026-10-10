@@ -109,9 +109,10 @@ jobs:
     needs: [verify, publish]
     # Never move the major tag to a prerelease.
     if: ${{ needs.verify.outputs.prerelease == 'false' }}
-    permissions:
-      contents: write
     uses: ./.github/workflows/update-main-version.yml
     with:
       target: ${{ github.ref_name }}
       major_version: ${{ needs.verify.outputs.major }}
+    secrets:
+      AUTOMATION_APP_ID: ${{ secrets.AUTOMATION_APP_ID }}
+      AUTOMATION_APP_KEY: ${{ secrets.AUTOMATION_APP_KEY }}
