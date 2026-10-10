@@ -25,19 +25,35 @@ on:
         description: The major version to update
         required: true
         type: string
+    secrets:
+      AUTOMATION_APP_ID:
+        required: true
+      AUTOMATION_APP_KEY:
+        required: true
 
+# Pushes with the andy-the-messenger-robot App token: it is the bypass actor of
+# the `v*` tag ruleset.
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   tag:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_APP_KEY }}
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write
+
       # Also usable as a rollback tool: dispatch with an older tag as target.
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Move major tag
         env:
