@@ -1,105 +1,117 @@
 # vstest-nanoframework
 
-A GitHub Action that executes [nanoFramework](https://nanoFramework.net) unit
-tests using the VSTest framework. Test results are displayed in the console logs
-and attached as a `.trx` artifact.
+A GitHub Action that runs [nanoFramework](https://nanoFramework.net) unit tests
+with VSTest. Results are shown in the log and uploaded as `.trx` files.
 
 > **Note:** This action only runs on `windows-*` runners.
 
 ## Prerequisites
 
-Your workflow must set up the following before using this action:
+Restore and build your solution (Release) before running this action, for
+example with
+[actions-nanoframework](https://github.com/CCSWE-nanoFramework/actions-nanoframework):
 
 ```yaml
 - uses: actions/checkout@v7
+
+- uses: CCSWE-nanoFramework/actions-nanoframework/.github/actions/setup-nanoframework@master
+
+- uses: CCSWE-nanoFramework/actions-nanoframework/.github/actions/build-nanoframework@master
   with:
-    fetch-depth: 0
-
-- uses: nanoframework/nanobuild@v1
-
-- uses: microsoft/setup-msbuild@v3
-
-- uses: nuget/setup-nuget@v4
+    solution: MySolution.sln
 ```
 
-After setup, restore NuGet packages and build your solution before running this
-action.
+## How tests are run
+
+- **Projects:** each test assembly maps to the `.nfproj` directory above it.
+- **Test adapter:** comes from the `nanoFramework.TestFramework` version in the
+  project's `packages.config`, restored under `packages/`.
+- **Run settings:** the project's `nano.runsettings`. A project without one
+  falls back to the template inside its TestFramework package. `run-settings`
+  overrides both.
+- **Runs:** assemblies that share settings and an adapter run in one vstest
+  call. Every run happens even if an earlier one fails, and the action then
+  fails once with a summary per run.
 
 ## Inputs
 
-| Name                    | Required | Default                                        | Type      | Description                                                                                                                                                                                       |
-| ----------------------- | -------- | ---------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `testAssemblies`        | yes      | `**\bin\**\NFUnitTest.dll`                     | `string`  | Glob pattern for test assembly files to run                                                                                                                                                       |
-| `solutionFolder`        | yes      | `.\`                                           | `string`  | Folder to search for the test assemblies and test adapter                                                                                                                                         |
-| `testAdapter`           | yes      | `**\packages\**\nanoFramework.TestAdapter.dll` | `string`  | Glob pattern for the test adapter assembly                                                                                                                                                        |
-| `runSettings`           | no       |                                                | `string`  | Path to runsettings or testsettings file to use with the tests. If not set, `solutionFolder` is searched for `nano.runsettings`; the action fails if none is found                                |
-| `runInParallel`         | no       | `false`                                        | `boolean` | If set, tests will run in parallel leveraging available cores of the machine. This will override the MaxCpuCount if specified in your runsettings file. Valid values are: `true` and `false`      |
-| `runInIsolation`        | no       | `false`                                        | `boolean` | Runs the tests in an isolated process. This makes vstest.console.exe process less likely to be stopped on an error in the tests, but tests might run slower. Valid values are: `true` and `false` |
-| `enableCodeCoverage`    | no       | `false`                                        | `boolean` | Collect code coverage information from the test run                                                                                                                                               |
-| `otherConsoleOptions`   | no       |                                                | `string`  | Other options that can be passed to vstest.console.exe                                                                                                                                            |
-| `platform`              | no       |                                                | `string`  | Build platform against which the tests should be reported. Valid values are: `x86`, `x64`, and `ARM`                                                                                              |
-| `artifactName`          | yes      | `vstest-results`                               | `string`  | Test result artifact name                                                                                                                                                                         |
-| `artifactRetentionDays` | no       |                                                | `number`  | Duration after which artifact will expire in days. 0 means using default retention. Minimum 1 day. Maximum 90 days unless changed from the repository settings page.                              |
+| Name                      | Default                             | Description                                                                                             |
+| ------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `test-assemblies`         | `**/bin/Release/NFUnitTest.dll`     | Glob patterns, one per line. Relative patterns resolve against `working-directory`; `!` excludes.       |
+| `working-directory`       | `.`                                 | Directory that relative patterns and paths resolve against                                              |
+| `run-settings`            |                                     | Run settings file for every project, instead of the per-project lookup                                  |
+| `other-console-options`   |                                     | Extra `vstest.console.exe` options, one per line, appended last                                         |
+| `results-directory`       | `$RUNNER_TEMP/vstest-nanoframework` | TRX output directory, cleared before the run                                                            |
+| `if-no-tests-found`       | `error`                             | `error`, `warn` or `ignore` when no test assemblies match                                               |
+| `artifact-name`           | `vstest-results`                    | Results artifact name. Empty skips the upload. Must be unique per run (e.g. include the matrix values). |
+| `artifact-retention-days` |                                     | 1-90; empty or 0 uses the repository default                                                            |
 
 ## Outputs
 
-Test results are uploaded as a `.trx` artifact named by `artifactName`. The
-artifact can be downloaded from the GitHub Actions run summary.
+| Name                | Description                          |
+| ------------------- | ------------------------------------ |
+| `results-directory` | Directory containing the TRX results |
+| `artifact-id`       | ID of the uploaded results artifact  |
 
-## Example usage
+The upload is best effort: missing results or an upload error produce a warning,
+not a failure.
 
-Minimal configuration using default glob patterns:
-
-```yaml
-- uses: CCSWE-nanoFramework/vstest-nanoframework@v1
-  with:
-    solutionFolder: '.\src'
-    artifactName: 'unit_test_results'
-    artifactRetentionDays: 7
-```
-
-With a runsettings file, parallel execution, and code coverage:
+## Example
 
 ```yaml
-- uses: CCSWE-nanoFramework/vstest-nanoframework@v1
+- uses: CCSWE-nanoFramework/vstest-nanoframework@v2
   with:
-    solutionFolder: '.\src'
-    runSettings: '.\src\NFUnitTest1\nano.runsettings'
-    runInParallel: true
-    enableCodeCoverage: true
-    artifactName: 'unit_test_results'
-    artifactRetentionDays: 7
+    working-directory: src
+    artifact-retention-days: 7
 ```
+
+## Migrating from v1
+
+v1 is frozen at v1.0.18 (critical fixes only).
+
+- Inputs are kebab-case: `testAssemblies` → `test-assemblies`, `solutionFolder`
+  → `working-directory`, `runSettings` → `run-settings`, `otherConsoleOptions` →
+  `other-console-options`, `artifactName` → `artifact-name`,
+  `artifactRetentionDays` → `artifact-retention-days`.
+- Removed: `testAdapter` (resolved per project), `platform`, `runInParallel`,
+  `runInIsolation`, `enableCodeCoverage`. Pass vstest flags through
+  `other-console-options` if needed.
+- `test-assemblies` defaults to `**/bin/Release/NFUnitTest.dll`; set it for
+  Debug builds.
+- `run-settings` is optional; each project uses its own `nano.runsettings`.
+- `other-console-options` takes one option per line.
+- Results go to `$RUNNER_TEMP/vstest-nanoframework`, one subdirectory per run.
 
 ## Releasing
 
-Releases are tag-driven. To cut a release:
+Releases are tag-driven:
 
 1. Make sure `master` is green and `dist/` is committed and up to date
    (`npm run bundle` produces no diff — CI enforces this).
-2. Create and push a `vMAJOR.MINOR.PATCH` tag:
+2. Create and push a `vMAJOR.MINOR.PATCH` tag from `master`:
 
    ```bash
    git tag vX.Y.Z
    git push origin vX.Y.Z
    ```
 
-The [`Release`](.github/workflows/release.yml) workflow then re-runs
-format/lint/test, re-verifies the committed `dist/`, creates a GitHub Release
-with auto-generated (categorized) notes, and moves the major tag (`v1`) to the
-new release.
-
-For a prerelease, include a hyphen (e.g. `v1.1.0-beta.1`): the release is marked
-**pre-release** and the major `v1` tag is **not** moved.
+The [`Release`](.github/workflows/release.yml) workflow re-runs
+format/lint/test, re-verifies `dist/`, creates a GitHub Release with generated
+notes, and moves the major tag (`vN`) to the new release. A tag with a hyphen
+(e.g. `v2.1.0-beta.1`) is a pre-release and doesn't move the major tag.
 
 Runtime dependency fixes (including Dependabot security updates) are bundled
 into `dist/`, so they only reach consumers once released.
 
-To point `v1` at another tag by hand (e.g. a rollback), run the
+To point a major tag at another release by hand (e.g. a rollback), run the
 [`Update Main Version`](.github/workflows/update-main-version.yml) workflow.
 
-Consumers keep referencing the major tag:
+### v1 fixes
 
-```yaml
-- uses: CCSWE-nanoFramework/vstest-nanoframework@v1
-```
+1. Branch `release/v1` from `v1.0.18` and add `release/**` to the branch filters
+   in `ci.yml` and `check-dist.yml`.
+2. Fix, bundle, and tag `v1.0.19` on that branch. `release.yml` requires tags on
+   `master`, so relax that check on the branch.
+3. Create the release with
+   `gh release create v1.0.19 --generate-notes --notes-start-tag v1.0.18 --latest=false`
+   so v2 stays "Latest".

@@ -1,82 +1,97 @@
 import * as core from '@actions/core'
-import * as path from 'path'
+import * as io from '@actions/io'
 import * as artifact from './artifact.js'
+import { findFiles } from './find.js'
+import { getActionInputs, Input } from './inputs.js'
+import * as path from './path.js'
+import { planTestGroups } from './plan.js'
 import * as vstest from './vstest.js'
-import { Default, getActionInputs } from './inputs.js'
 
 export async function run(): Promise<void> {
-  let testsExecuted = false
-  const inputs = getActionInputs()
-
   try {
-    const testAssemblies = await vstest.getTestAssemblies(inputs)
-    if (testAssemblies.length === 0) {
-      throw new Error('No test assemblies found.')
+    if (process.platform !== 'win32') {
+      throw new Error(
+        'vstest-nanoframework requires a Windows runner (vstest.console.exe and the .NET Framework 4.8 test adapter)'
+      )
     }
 
-    core.debug(`Matched test assemblies are:`)
-    for (const testAssembly of testAssemblies) {
-      core.debug(`${testAssembly}`)
-    }
+    const inputs = getActionInputs()
 
-    const testAdapters = await vstest.getTestAdapters(inputs)
-    core.debug(`Matched test adapters are:`)
-    for (const testAdapter of testAdapters) {
-      core.debug(`${testAdapter}`)
-    }
-
-    if (testAdapters.length === 0) {
-      throw new Error('Test adapter not found')
-    } else if (testAdapters.length > 1) {
-      core.warning('Multiple test adapters found')
-      for (const testAdapter of testAdapters) {
-        core.warning(`${testAdapter}`)
+    const assemblies = await findFiles(
+      inputs.testAssemblies,
+      inputs.workingDirectory
+    )
+    if (assemblies.length === 0) {
+      const message = `No test assemblies found for '${Input.TestAssemblies}': ${inputs.testAssemblies.join(', ')}`
+      switch (inputs.ifNoTestsFound) {
+        case 'error':
+          throw new Error(message)
+        case 'warn':
+          core.warning(message)
+          return
+        case 'ignore':
+          core.info(message)
+          return
       }
     }
 
-    const testAdapterPath = path.dirname(testAdapters[0])
-
-    if (!inputs.runSettings) {
-      const runSettings = await vstest.getRunSettings(inputs)
-
-      if (runSettings.length === 0) {
-        throw new Error('Run settings not found')
-      } else if (runSettings.length > 1) {
-        core.warning('Multiple run settings found')
-        for (const runSetting of runSettings) {
-          core.warning(`${runSetting}`)
-        }
-      }
-
-      inputs.runSettings = runSettings[0]
+    const groups = planTestGroups(
+      assemblies,
+      inputs.runSettings,
+      inputs.workingDirectory
+    )
+    for (const group of groups) {
+      core.info(
+        `${group.name}: ${group.assemblies.length} assembly(ies), settings ${group.runSettings}`
+      )
     }
 
-    let vsTestPath = await vstest.getVsTestPath()
-    if (!vsTestPath) {
-      vsTestPath = await vstest.downloadTestTools()
+    const vsTestPath =
+      (await vstest.getVsTestPath()) || (await vstest.downloadTestTools())
+    core.info(`Using ${vsTestPath}`)
+
+    const resultsDirectory =
+      inputs.resultsDirectory ||
+      path.join(process.env['RUNNER_TEMP'] ?? '.', 'vstest-nanoframework')
+    await io.rmRF(resultsDirectory)
+    await io.mkdirP(resultsDirectory)
+    core.setOutput('results-directory', resultsDirectory)
+
+    const results: vstest.GroupResult[] = []
+    for (const group of groups) {
+      results.push(
+        await vstest.runTestGroup(
+          vsTestPath,
+          group,
+          resultsDirectory,
+          inputs.otherConsoleOptions
+        )
+      )
     }
 
-    core.info(`${vsTestPath}`)
-
-    const args = vstest.getTestArguments(inputs)
-    core.debug(`Arguments: ${args}`)
-
-    core.info(`Running tests...`)
-    testsExecuted = true
-    await vstest.runTests(vsTestPath, testAssemblies, testAdapterPath, args)
-  } catch (error) {
-    core.setFailed(error.message)
-  }
-
-  try {
-    if (testsExecuted) {
-      await artifact.uploadArtifact(
-        inputs.artifactName ?? Default.artifactName,
-        'TestResults',
+    if (inputs.artifactName) {
+      const id = await artifact.uploadResults(
+        inputs.artifactName,
+        resultsDirectory,
         inputs.artifactRetentionDays
+      )
+      if (id !== undefined) {
+        core.setOutput('artifact-id', id)
+      }
+    }
+
+    const failed = results.filter(r => r.exitCode !== 0)
+    if (failed.length > 0) {
+      const lines = failed.map(r =>
+        r.hasResults
+          ? `${r.group.name}: tests failed (exit code ${r.exitCode})`
+          : `${r.group.name}: vstest failed without writing results (exit code ${r.exitCode})`
+      )
+      throw new Error(
+        `${failed.length} of ${results.length} test run(s) failed:\n${lines.join('\n')}`
       )
     }
   } catch (error) {
-    core.setFailed(error.message)
+    core.setFailed(error instanceof Error ? error.message : String(error))
   }
 }

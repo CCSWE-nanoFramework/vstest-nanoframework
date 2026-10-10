@@ -1,76 +1,66 @@
 name: 'vstest-nanoframework'
-description: 'Runs VSTest and uploads result logs'
+description: 'Runs nanoFramework unit tests with VSTest and uploads the results'
 author: 'CCSWE'
 
 branding:
   icon: 'code'
   color: 'blue'
 
-# Define your inputs here.
 inputs:
-  testAssemblies:
-    description: 'Run tests from the specified files'
-    required: true
-    default: '**\\bin\\**\\NFUnitTest.dll'
-
-  solutionFolder:
-    description: 'Folder to search for the test assemblies and test adapter'
-    required: true
-    default: '.\\'
-
-  testAdapter:
-    description: 'Run tests using the specified test adapter'
-    required: true
-    default: '**\\packages\\**\\nanoFramework.TestAdapter.dll'
-
-  runSettings:
+  test-assemblies:
     description:
-      'Path to runsettings or testsettings file to use with the tests. If not
-      set, `solutionFolder` is searched for `nano.runsettings`; the action fails
-      if none is found'
+      'Glob patterns (one per line) for the test assemblies. Relative patterns
+      are resolved against `working-directory`; `!` excludes.'
     required: false
+    default: '**/bin/Release/NFUnitTest.dll'
 
-  runInParallel:
+  working-directory:
     description:
-      'If set, tests will run in parallel leveraging available cores of the
-      machine. This will override the MaxCpuCount if specified in your
-      runsettings file. Valid values are: `true` and `false`'
+      'Directory that relative patterns and paths are resolved against'
     required: false
-    default: 'false'
+    default: '.'
 
-  runInIsolation:
+  run-settings:
     description:
-      'Runs the tests in an isolated process. This makes vstest.console.exe
-      process less likely to be stopped on an error in the tests, but tests
-      might run slower. Valid values are: `true` and `false`'
-    required: false
-    default: 'false'
-
-  enableCodeCoverage:
-    description: 'Collect code coverage information from the test run'
-    required: false
-    default: 'false'
-
-  otherConsoleOptions:
-    description: 'Other options that can be passed to vstest.console.exe'
+      'Run settings file to use for every test project. If not set, each project
+      uses its own `nano.runsettings`, falling back to the template in its
+      nanoFramework.TestFramework package.'
     required: false
 
-  platform:
+  other-console-options:
     description:
-      'Build platform against which the tests should be reported. Valid values
-      are: `x86`, `x64`, and `ARM`'
+      'Extra vstest.console.exe options, one per line, appended after the
+      generated arguments'
     required: false
 
-  artifactName:
-    description: 'Test result artifact name'
-    required: true
+  results-directory:
+    description:
+      'Directory for the TRX results, cleared before the run. Defaults to
+      `$RUNNER_TEMP/vstest-nanoframework`.'
+    required: false
+
+  if-no-tests-found:
+    description:
+      'What to do when no test assemblies match: `error`, `warn` or `ignore`'
+    required: false
+    default: 'error'
+
+  artifact-name:
+    description: 'Name of the results artifact. Empty skips the upload.'
+    required: false
     default: 'vstest-results'
 
-  artifactRetentionDays:
-    description: >
-      Duration after which artifact will expire in days. 0 means using default
-      retention. Minimum 1 day. Maximum 90 days unless changed from the
-      repository settings page.
+  artifact-retention-days:
+    description:
+      'Days to keep the results artifact (1-90). Empty or 0 uses the repository
+      default.'
+    required: false
+
+outputs:
+  results-directory:
+    description: 'Directory containing the TRX results'
+  artifact-id:
+    description: 'ID of the uploaded results artifact'
 
 runs:
   using: node24

@@ -1,169 +1,85 @@
-import { vi, describe, it, expect, beforeEach, type MockInstance } from 'vitest'
-import * as core from '@actions/core'
-import * as sut from '../src/inputs.js'
-import { Default, Input } from '../src/inputs.js'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { getActionInputs } from '../src/inputs.js'
 
-vi.mock('@actions/core')
+const Defaults: Record<string, string> = {
+  'test-assemblies': '**/bin/Release/NFUnitTest.dll',
+  'working-directory': '.',
+  'if-no-tests-found': 'error',
+  'artifact-name': 'vstest-results'
+}
 
-let getBooleanInputMock: MockInstance<typeof core.getBooleanInput>
-let getInputMock: MockInstance<typeof core.getInput>
+function setInput(name: string, value: string): void {
+  process.env[`INPUT_${name.toUpperCase()}`] = value
+}
 
 describe('getActionInputs()', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
-
-    getBooleanInputMock = vi
-      .spyOn(core, 'getBooleanInput')
-      .mockImplementation(() => false)
-    getInputMock = vi.spyOn(core, 'getInput').mockImplementation(() => '')
+    for (const [name, value] of Object.entries(Defaults)) {
+      setInput(name, value)
+    }
   })
 
-  it('sets correct defaults', () => {
-    const inputs = sut.getActionInputs()
-
-    expect(inputs.enableCodeCoverage).toBe(Default.enableCodeCoverage)
-    expect(inputs.platform).toBe(Default.platform)
-    expect(inputs.runInIsolation).toBe(Default.runInIsolation)
-    expect(inputs.runInParallel).toBe(Default.runInParallel)
-    expect(inputs.runSettings).toBe(Default.runSettings)
-    expect(inputs.solutionFolder).toBe(Default.solutionFolder)
-    expect(inputs.testAdapter).toBe(Default.testAdapter)
-    expect(inputs.testAssemblies).toBe(Default.testAssemblies)
-    expect(inputs.otherConsoleOptions).toBe(Default.otherConsoleOptions)
+  afterEach(() => {
+    for (const key of Object.keys(process.env)) {
+      if (key.startsWith('INPUT_')) {
+        delete process.env[key]
+      }
+    }
   })
 
-  it('parses inputs', () => {
-    getBooleanInputMock.mockImplementation((_name, defaultValue) => {
-      return !defaultValue
-    })
+  it('reads the action.yml defaults', () => {
+    const inputs = getActionInputs()
 
-    getInputMock.mockImplementation(name => {
-      return name
-    })
-
-    const inputs = sut.getActionInputs()
-
-    expect(inputs.enableCodeCoverage).toBe(!Default.enableCodeCoverage)
-    expect(inputs.platform).toBe(Input.Platform)
-    expect(inputs.runInIsolation).toBe(!Default.runInIsolation)
-    expect(inputs.runInParallel).toBe(!Default.runInParallel)
-    expect(inputs.runSettings).toBe(Input.RunSettings)
-    expect(inputs.solutionFolder).toBe(Input.SolutionFolder)
-    expect(inputs.testAdapter).toBe(Input.TestAdapter)
-    expect(inputs.testAssemblies).toBe(Input.TestAssemblies)
-    expect(inputs.otherConsoleOptions).toBe(Input.OtherConsoleOptions)
-  })
-})
-
-describe('getBooleanInput()', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-
-    getBooleanInputMock = vi
-      .spyOn(core, 'getBooleanInput')
-      .mockImplementation(() => false)
+    expect(inputs.testAssemblies).toEqual(['**/bin/Release/NFUnitTest.dll'])
+    expect(inputs.workingDirectory).toBe('.')
+    expect(inputs.ifNoTestsFound).toBe('error')
+    expect(inputs.artifactName).toBe('vstest-results')
+    expect(inputs.artifactRetentionDays).toBe(0)
+    expect(inputs.runSettings).toBe('')
+    expect(inputs.resultsDirectory).toBe('')
+    expect(inputs.otherConsoleOptions).toEqual([])
   })
 
-  it('returns correct value', () => {
-    getBooleanInputMock.mockImplementation(() => true)
+  it('reads multiline inputs one entry per line', () => {
+    setInput('test-assemblies', 'a/NFUnitTest.dll\n!b/**\n')
+    setInput('other-console-options', '/Blame\n/Diag:log.txt')
 
-    const result = sut.getBooleanInput('name', false)
+    const inputs = getActionInputs()
 
-    expect(getBooleanInputMock).toHaveBeenCalledTimes(1)
-    expect(result).toBe(true)
+    expect(inputs.testAssemblies).toEqual(['a/NFUnitTest.dll', '!b/**'])
+    expect(inputs.otherConsoleOptions).toEqual(['/Blame', '/Diag:log.txt'])
   })
 
-  it('returns default value on error', () => {
-    getBooleanInputMock.mockImplementation(() => {
-      throw new Error()
-    })
+  it('accepts retention days from 0 to 90', () => {
+    setInput('artifact-retention-days', '90')
 
-    const result = sut.getBooleanInput('name', true)
-
-    expect(getBooleanInputMock).toHaveBeenCalledTimes(1)
-    expect(result).toBe(true)
-  })
-})
-
-describe('getNumberInput()', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-
-    getInputMock = vi.spyOn(core, 'getInput').mockImplementation(() => '')
+    expect(getActionInputs().artifactRetentionDays).toBe(90)
   })
 
-  it('returns correct value', () => {
-    getInputMock.mockImplementation(() => '69')
+  it.each(['-1', '91', '7days', '1.5', 'x'])(
+    'throws for invalid retention days %s',
+    value => {
+      setInput('artifact-retention-days', value)
 
-    const result = sut.getNumberInput('name', 420)
+      expect(() => getActionInputs()).toThrow(/artifact-retention-days/)
+    }
+  )
 
-    expect(getInputMock).toHaveBeenCalledTimes(1)
-    expect(result).toBe(69)
+  it.each(['warn', 'ignore'])('accepts if-no-tests-found %s', value => {
+    setInput('if-no-tests-found', value)
+
+    expect(getActionInputs().ifNoTestsFound).toBe(value)
   })
 
-  it('returns default value on empty string', () => {
-    getInputMock.mockImplementation(() => '')
+  it('throws for an invalid if-no-tests-found', () => {
+    setInput('if-no-tests-found', 'fail')
 
-    const result = sut.getNumberInput('name', 420)
-
-    expect(getInputMock).toHaveBeenCalledTimes(1)
-    expect(result).toBe(420)
+    expect(() => getActionInputs()).toThrow(/if-no-tests-found/)
   })
 
-  it('returns default value on error', () => {
-    getInputMock.mockImplementation(() => {
-      throw new Error()
-    })
+  it('throws when test-assemblies is empty', () => {
+    setInput('test-assemblies', '')
 
-    const result = sut.getNumberInput('name', 420)
-
-    expect(getInputMock).toHaveBeenCalledTimes(1)
-    expect(result).toBe(420)
-  })
-
-  it('returns default value on NaN', () => {
-    getInputMock.mockImplementation(() => 'This is not a number')
-
-    const result = sut.getNumberInput('name', 420)
-
-    expect(getInputMock).toHaveBeenCalledTimes(1)
-    expect(result).toBe(420)
-  })
-})
-
-describe('getStringInput()', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-
-    getInputMock = vi.spyOn(core, 'getInput').mockImplementation(() => '')
-  })
-
-  it('returns correct value', () => {
-    getInputMock.mockImplementation(() => 'inputValue')
-
-    const result = sut.getStringInput('name', 'defaultValue')
-
-    expect(getInputMock).toHaveBeenCalledTimes(1)
-    expect(result).toBe('inputValue')
-  })
-
-  it('returns default value on empty string', () => {
-    getInputMock.mockImplementation(() => '')
-
-    const result = sut.getStringInput('name', 'defaultValue')
-
-    expect(getInputMock).toHaveBeenCalledTimes(1)
-    expect(result).toBe('defaultValue')
-  })
-
-  it('returns default value on error', () => {
-    getInputMock.mockImplementation(() => {
-      throw new Error()
-    })
-
-    const result = sut.getStringInput('name', 'defaultValue')
-
-    expect(getInputMock).toHaveBeenCalledTimes(1)
-    expect(result).toBe('defaultValue')
+    expect(() => getActionInputs()).toThrow(/test-assemblies/)
   })
 })
