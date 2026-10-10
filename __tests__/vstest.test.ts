@@ -51,6 +51,7 @@ describe('runTestGroup()', () => {
     )
 
     expect(result).toEqual({ exitCode: 1, group, hasResults: true })
+    expect(vi.mocked(exec.exec).mock.calls[0][0]).toBe('"vstest.console.exe"')
     expect(vi.mocked(exec.exec).mock.calls[0][2]).toEqual({
       ignoreReturnCode: true
     })

@@ -146859,7 +146859,8 @@ async function getVsTestPath() {
         core_debug(`vswhere.exe not found at ${vsWhere}`);
         return '';
     }
-    const result = await getExecOutput(vsWhere, ['-latest', '-products', '*', '-property', 'installationPath'], { ignoreReturnCode: true, silent: true });
+    // exec parses its first argument as a command line; quote paths with spaces.
+    const result = await getExecOutput(quote(toNative(vsWhere)), ['-latest', '-products', '*', '-property', 'installationPath'], { ignoreReturnCode: true, silent: true });
     const installPath = result.stdout.trim();
     if (result.exitCode !== 0 || !installPath) {
         core_debug(`vswhere.exe found no Visual Studio install`);
@@ -146888,7 +146889,7 @@ async function runTestGroup(vsTestPath, group, resultsDirectory, otherConsoleOpt
     startGroup(`vstest ${group.name}`);
     let exitCode;
     try {
-        exitCode = await exec_exec(toNative(vsTestPath), args, {
+        exitCode = await exec_exec(quote(toNative(vsTestPath)), args, {
             ignoreReturnCode: true
         });
     }
@@ -146901,6 +146902,9 @@ async function runTestGroup(vsTestPath, group, resultsDirectory, otherConsoleOpt
     }
     const trx = await (await create(join(groupDirectory, '**/*.trx'))).glob();
     return { exitCode, group, hasResults: trx.length > 0 };
+}
+function quote(value) {
+    return `"${value}"`;
 }
 function toNative(value) {
     return external_path_.normalize(value);

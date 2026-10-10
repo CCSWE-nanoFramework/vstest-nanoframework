@@ -63,8 +63,9 @@ export async function getVsTestPath(): Promise<string> {
     return ''
   }
 
+  // exec parses its first argument as a command line; quote paths with spaces.
   const result = await exec.getExecOutput(
-    vsWhere,
+    quote(toNative(vsWhere)),
     ['-latest', '-products', '*', '-property', 'installationPath'],
     { ignoreReturnCode: true, silent: true }
   )
@@ -110,7 +111,7 @@ export async function runTestGroup(
   core.startGroup(`vstest ${group.name}`)
   let exitCode: number
   try {
-    exitCode = await exec.exec(toNative(vsTestPath), args, {
+    exitCode = await exec.exec(quote(toNative(vsTestPath)), args, {
       ignoreReturnCode: true
     })
   } catch (error) {
@@ -125,6 +126,10 @@ export async function runTestGroup(
   ).glob()
 
   return { exitCode, group, hasResults: trx.length > 0 }
+}
+
+function quote(value: string): string {
+  return `"${value}"`
 }
 
 function toNative(value: string): string {

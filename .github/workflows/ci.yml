@@ -117,13 +117,19 @@ jobs:
           artifact-name: vstest-results-failure
           artifact-retention-days: 1
 
+      # The failure must come from the test run, so a TRX has to exist.
       - name: Check the action failed
         shell: bash
         env:
           OUTCOME: ${{ steps.test-action.outcome }}
+          RESULTS: ${{ steps.test-action.outputs.results-directory }}
         run: |
           if [ "$OUTCOME" != failure ]; then
             echo "::error::Expected the action to fail, outcome was $OUTCOME"
+            exit 1
+          fi
+          if [ -z "$RESULTS" ] || [ -z "$(find "$RESULTS" -name '*.trx')" ]; then
+            echo "::error::The action failed without writing test results"
             exit 1
           fi
 
