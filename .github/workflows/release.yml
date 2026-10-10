@@ -3,21 +3,22 @@ name: Release
 on:
   push:
     tags:
-      # Two-dot shape: matches v1.0.13 and v1.0.13-beta; excludes the bare
-      # major tag `v1` (no dots) so moving it does not re-trigger this workflow.
+      # Two-dot shape: matches v2.0.0 and v2.0.0-beta.1; excludes the bare
+      # major tag (v2) so moving it does not re-trigger this workflow.
       - 'v*.*.*'
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  release:
-    name: Build, verify dist, and publish release
+  verify:
+    name: Build and verify dist
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       major: ${{ steps.major.outputs.major }}
       prerelease: ${{ steps.major.outputs.prerelease }}
@@ -27,6 +28,14 @@ jobs:
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check tag is on master
+        run: |
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/master; then
+            echo "::error::${GITHUB_REF_NAME} is not on master"
+            exit 1
+          fi
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -67,33 +76,42 @@ jobs:
       - name: Compute major version and prerelease flag
         id: major
         run: |
-          ref="${GITHUB_REF_NAME}"          # e.g. v1.0.13 or v1.0.13-beta.1
-          echo "major=${ref%%.*}" >> "$GITHUB_OUTPUT"   # -> v1
+          ref="${GITHUB_REF_NAME}"          # e.g. v2.0.0 or v2.0.0-beta.1
+          echo "major=${ref%%.*}" >> "$GITHUB_OUTPUT"   # -> v2
           if [[ "${ref}" == *-* ]]; then
             echo "prerelease=true" >> "$GITHUB_OUTPUT"
           else
             echo "prerelease=false" >> "$GITHUB_OUTPUT"
           fi
 
+  publish:
+    name: Publish release
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+
+    steps:
       - name: Create GitHub Release
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
         run: |
-          args=("${GITHUB_REF_NAME}" --generate-notes --title "${GITHUB_REF_NAME}")
+          args=("${GITHUB_REF_NAME}" -R "$REPO" --generate-notes --title "${GITHUB_REF_NAME}")
           if [[ "${GITHUB_REF_NAME}" == *-* ]]; then
             args+=(--prerelease)
           fi
           gh release create "${args[@]}"
 
   update-major-version:
-    name: Move major tag (${{ needs.release.outputs.major }})
-    needs: release
+    name: Move major tag (${{ needs.verify.outputs.major }})
+    needs: [verify, publish]
     # Never move the major tag to a prerelease.
-    if: ${{ needs.release.outputs.prerelease == 'false' }}
+    if: ${{ needs.verify.outputs.prerelease == 'false' }}
     permissions:
       contents: write
     uses: ./.github/workflows/update-main-version.yml
     with:
       target: ${{ github.ref_name }}
-      major_version: ${{ needs.release.outputs.major }}
-    secrets: inherit
+      major_version: ${{ needs.verify.outputs.major }}

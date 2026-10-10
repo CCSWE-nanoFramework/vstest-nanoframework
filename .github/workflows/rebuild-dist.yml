@@ -1,5 +1,6 @@
 # Rebuilds dist/ and commits it back to the branch: automatically on Dependabot
-# PRs, on demand for any other branch.
+# PRs, on demand for any other branch. The build job runs dependency code
+# without secrets; the commit job holds the App key and never runs npm.
 name: Rebuild dist/
 
 on:
@@ -16,14 +17,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  rebuild-dist:
-    name: Rebuild dist/
+  build:
+    name: Build dist/
     if:
       (github.event_name == 'pull_request' &&
       github.event.pull_request.user.login == 'dependabot[bot]') ||
       (github.event_name == 'workflow_dispatch' && github.ref_name !=
       github.event.repository.default_branch)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      changed: ${{ steps.changes.outputs.changed }}
     env:
       BRANCH: ${{ github.head_ref || github.ref_name }}
 
@@ -55,18 +59,60 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      # Created after the build so dependency code never runs with the token.
+      - name: Upload dist/
+        if: steps.changes.outputs.changed == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/
+          retention-days: 1
+
+  commit:
+    name: Commit dist/
+    needs: build
+    if: needs.build.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      BRANCH: ${{ github.head_ref || github.ref_name }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ env.BRANCH }}
+          persist-credentials: false
+
+      # Replace dist/ wholesale so files the build dropped are deleted too.
+      - name: Remove dist/
+        run: rm -rf dist/
+
+      - name: Download dist/
+        uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+
+      - name: Check only dist/ changed
+        run: |
+          outside="$(git status --porcelain | grep -v ' dist/' || true)"
+          if [ -n "$outside" ]; then
+            echo "::error::Unexpected changes outside dist/:"
+            echo "$outside"
+            exit 1
+          fi
+
       - name: Create App Token
         id: app-token
-        if: steps.changes.outputs.changed == 'true'
         uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.AUTOMATION_APP_ID }}
           private-key: ${{ secrets.AUTOMATION_APP_KEY }}
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write
 
       # Pushed with the App token so the new commit triggers the checks.
       - name: Commit and Push
-        if: steps.changes.outputs.changed == 'true'
         run: |
           user="${APP_SLUG}[bot]"
           id="$(gh api "users/${user}" -q .id)"

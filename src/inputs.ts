@@ -1,118 +1,71 @@
 import * as core from '@actions/core'
 
 export enum Input {
-  ArtifactName = 'artifactName',
-  ArtifactRetentionDays = 'artifactRetentionDays',
-  EnableCodeCoverage = 'enableCodeCoverage',
-  Platform = 'platform',
-  RunInIsolation = 'runInIsolation',
-  RunInParallel = 'runInParallel',
-  RunSettings = 'runSettings',
-  SolutionFolder = 'solutionFolder',
-  TestAdapter = 'testAdapter',
-  TestAssemblies = 'testAssemblies',
-  OtherConsoleOptions = 'otherConsoleOptions'
+  ArtifactName = 'artifact-name',
+  ArtifactRetentionDays = 'artifact-retention-days',
+  IfNoTestsFound = 'if-no-tests-found',
+  OtherConsoleOptions = 'other-console-options',
+  ResultsDirectory = 'results-directory',
+  RunSettings = 'run-settings',
+  TestAssemblies = 'test-assemblies',
+  WorkingDirectory = 'working-directory'
 }
+
+export type IfNoTestsFound = 'error' | 'warn' | 'ignore'
+
+const IfNoTestsFoundValues: IfNoTestsFound[] = ['error', 'warn', 'ignore']
 
 export interface Inputs {
-  artifactName?: string
-  artifactRetentionDays?: number
-  enableCodeCoverage?: boolean
-  platform?: string
-  runInIsolation?: boolean
-  runInParallel?: boolean
-  runSettings?: string
-  solutionFolder?: string
-  testAdapter?: string
-  testAssemblies?: string
-  otherConsoleOptions?: string
-}
-
-export function getActionInputs(): Inputs {
-  return {
-    enableCodeCoverage: getBooleanInput(
-      Input.EnableCodeCoverage,
-      Default.enableCodeCoverage
-    ),
-    platform: getStringInput(Input.Platform, Default.platform),
-    artifactName: getStringInput(Input.ArtifactName, Default.artifactName),
-    artifactRetentionDays: getNumberInput(
-      Input.ArtifactRetentionDays,
-      Default.artifactRetentionDays
-    ),
-    runInIsolation: getBooleanInput(
-      Input.RunInIsolation,
-      Default.runInIsolation
-    ),
-    runInParallel: getBooleanInput(Input.RunInParallel, Default.runInParallel),
-    runSettings: getStringInput(Input.RunSettings, Default.runSettings),
-    solutionFolder: getStringInput(
-      Input.SolutionFolder,
-      Default.solutionFolder
-    ),
-    testAdapter: getStringInput(Input.TestAdapter, Default.testAdapter),
-    testAssemblies: getStringInput(
-      Input.TestAssemblies,
-      Default.testAssemblies
-    ),
-    otherConsoleOptions: getStringInput(
-      Input.OtherConsoleOptions,
-      Default.otherConsoleOptions
-    )
-  }
-}
-
-export function getBooleanInput(name: string, defaultValue: boolean): boolean {
-  try {
-    return core.getBooleanInput(name) ?? defaultValue
-  } catch {
-    return defaultValue
-  }
-}
-
-export function getNumberInput(name: string, defaultValue: number): number {
-  try {
-    let input = defaultValue
-    const inputString = core.getInput(name) ?? defaultValue
-
-    if (inputString) {
-      input = parseInt(inputString)
-      if (isNaN(input)) {
-        input = defaultValue
-        core.warning(`Invalid input supplied for '${name}': ${inputString}`)
-      }
-    }
-
-    return input
-  } catch {
-    return defaultValue
-  }
-}
-
-export function getStringInput(name: string, defaultValue: string): string {
-  try {
-    const input = core.getInput(name) ?? defaultValue
-    return input ? input : defaultValue
-  } catch {
-    return defaultValue
-  }
+  artifactName: string
+  artifactRetentionDays: number
+  ifNoTestsFound: IfNoTestsFound
+  otherConsoleOptions: string[]
+  resultsDirectory: string
+  runSettings: string
+  testAssemblies: string[]
+  workingDirectory: string
 }
 
 /**
- * Keep these in sync with action.yml
+ * Reads the action inputs. Defaults live in action.yml; invalid values throw.
  */
-class InputsImplementation implements Inputs {
-  enableCodeCoverage = false
-  platform = ''
-  artifactName = 'vstest-results'
-  artifactRetentionDays = 0
-  runInIsolation = false
-  runInParallel = false
-  runSettings = ''
-  solutionFolder = '.\\'
-  testAdapter = '**\\packages\\**\\nanoFramework.TestAdapter.dll'
-  testAssemblies = '**\\bin\\**\\NFUnitTest.dll'
-  otherConsoleOptions = ''
+export function getActionInputs(): Inputs {
+  return {
+    artifactName: core.getInput(Input.ArtifactName),
+    artifactRetentionDays: getRetentionDays(),
+    ifNoTestsFound: getIfNoTestsFound(),
+    otherConsoleOptions: core.getMultilineInput(Input.OtherConsoleOptions),
+    resultsDirectory: core.getInput(Input.ResultsDirectory),
+    runSettings: core.getInput(Input.RunSettings),
+    testAssemblies: core.getMultilineInput(Input.TestAssemblies, {
+      required: true
+    }),
+    workingDirectory: core.getInput(Input.WorkingDirectory, { required: true })
+  }
 }
 
-export const Default = new InputsImplementation()
+function getIfNoTestsFound(): IfNoTestsFound {
+  const value = core.getInput(Input.IfNoTestsFound, { required: true })
+  const match = IfNoTestsFoundValues.find(v => v === value)
+  if (!match) {
+    throw new Error(
+      `Invalid value for '${Input.IfNoTestsFound}': ${value}. Expected one of: ${IfNoTestsFoundValues.join(', ')}`
+    )
+  }
+  return match
+}
+
+function getRetentionDays(): number {
+  const value = core.getInput(Input.ArtifactRetentionDays)
+  if (!value) {
+    return 0
+  }
+
+  const days = Number(value)
+  if (!/^\d+$/.test(value) || days > 90) {
+    throw new Error(
+      `Invalid value for '${Input.ArtifactRetentionDays}': ${value}. Expected a whole number from 0 to 90`
+    )
+  }
+  return days
+}

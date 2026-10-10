@@ -11,6 +11,7 @@ on:
         type: choice
         description: The major version to update
         options:
+          - v2
           - v1
   workflow_call:
     inputs:
@@ -20,7 +21,7 @@ on:
         type: string
       major_version:
         # workflow_call cannot use type: choice; the caller passes the major
-        # derived from the release tag (e.g. v1, and v2 once it exists).
+        # derived from the release tag.
         description: The major version to update
         required: true
         type: string
@@ -31,18 +32,17 @@ permissions:
 jobs:
   tag:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      # Note this update workflow can also be used as a rollback tool.
-      # For that reason, it's best to pin `actions/checkout` to a known, stable version
-      # (typically, about two releases back).
+      # Also usable as a rollback tool: dispatch with an older tag as target.
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - name: Git config
+
+      - name: Move major tag
+        env:
+          MAJOR: ${{ inputs.major_version }}
+          TARGET: ${{ inputs.target }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-      - name: Tag new target
-        run: git tag -f ${{ inputs.major_version }} ${{ inputs.target }}
-      - name: Push new tag
-        run: git push origin ${{ inputs.major_version }} --force
+          git tag -f "$MAJOR" "${TARGET}^{commit}"
+          git push origin "refs/tags/${MAJOR}" --force

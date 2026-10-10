@@ -1,120 +1,55 @@
-import { vi, describe, it, expect, beforeEach, type MockInstance } from 'vitest'
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
+import * as core from '@actions/core'
 import { DefaultArtifactClient } from '@actions/artifact'
-import * as sut from '../src/artifact.js'
-import * as find from '../src/find.js'
+import { uploadResults } from '../src/artifact.js'
+import { createFixture } from './helpers/fixture.js'
 
-let findMock: MockInstance<typeof find.find>
+vi.mock('@actions/core')
 
-vi.mock('@actions/artifact', () => {
-  return {
-    DefaultArtifactClient: vi.fn().mockImplementation(function () {
-      return {
-        uploadArtifact: (name: string) => {
-          switch (name) {
-            case 'invalid_size':
-              return { id: 'id', size: 0 }
-            case 'undefined_id':
-              return { id: undefined, size: 420 }
-            case 'undefined_size':
-              return { id: 'id', size: undefined }
-            default:
-              return { id: 'id', size: 420 }
-          }
-        }
-      }
-    })
-  }
-})
+const uploadArtifact = vi.fn()
 
-describe('uploadArtifact()', () => {
-  const MockedArtifactClient = vi.mocked(DefaultArtifactClient)
+vi.mock('@actions/artifact', () => ({
+  DefaultArtifactClient: vi.fn().mockImplementation(function () {
+    return { uploadArtifact }
+  })
+}))
 
+let dispose: () => void = () => {}
+
+describe('uploadResults()', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-
-    findMock = vi.spyOn(find, 'find').mockImplementation(async () => ({
-      directories: [],
-      files: [],
-      searchPaths: []
-    }))
-
-    MockedArtifactClient.mockClear()
+    uploadArtifact.mockResolvedValue({ id: 42, size: 10 })
   })
 
-  it('throws if files not found', async () => {
-    findMock.mockImplementation(async () => {
-      return {
-        directories: [],
-        files: [],
-        searchPaths: []
-      }
-    })
+  afterEach(() => dispose())
 
-    const name = 'artifact_name'
-    const path = 'artifact_path'
+  it('uploads every file and returns the id', async () => {
+    const fixture = createFixture({ '1-A/1-A.trx': 'x', '2-B/2-B.trx': 'y' })
+    dispose = fixture.dispose
 
-    await expect(sut.uploadArtifact(name, path)).rejects.toThrow()
+    expect(await uploadResults('results', fixture.root, 5)).toBe(42)
+    expect(uploadArtifact.mock.calls[0][1]).toHaveLength(2)
+    expect(uploadArtifact.mock.calls[0][3]).toEqual({ retentionDays: 5 })
+    expect(DefaultArtifactClient).toHaveBeenCalled()
   })
 
-  it('throws if id is undefined', async () => {
-    findMock.mockImplementation(async () => {
-      return {
-        directories: [],
-        files: ['file1'],
-        searchPaths: ['searchPath1']
-      }
-    })
+  it('warns and skips when there are no results', async () => {
+    const fixture = createFixture({})
+    dispose = fixture.dispose
 
-    const name = 'undefined_id'
-    const path = 'artifact_path'
-
-    await expect(sut.uploadArtifact(name, path)).rejects.toThrow()
+    expect(await uploadResults('results', fixture.root, 0)).toBeUndefined()
+    expect(uploadArtifact).not.toHaveBeenCalled()
+    expect(core.warning).toHaveBeenCalled()
   })
 
-  it('throws if size is invalid', async () => {
-    findMock.mockImplementation(async () => {
-      return {
-        directories: [],
-        files: ['file1', 'file2'],
-        searchPaths: ['searchPath1']
-      }
-    })
+  it('warns instead of failing when the upload fails', async () => {
+    const fixture = createFixture({ '1-A/1-A.trx': 'x' })
+    dispose = fixture.dispose
+    uploadArtifact.mockRejectedValue(new Error('409 Conflict'))
 
-    const name = 'invalid_size'
-    const path = 'artifact_path'
-
-    await expect(sut.uploadArtifact(name, path)).rejects.toThrow()
-  })
-
-  it('throws if size is undefined', async () => {
-    findMock.mockImplementation(async () => {
-      return {
-        directories: [],
-        files: ['file1', 'file2', 'file3'],
-        searchPaths: ['searchPath1']
-      }
-    })
-
-    const name = 'undefined_size'
-    const path = 'artifact_path'
-
-    await expect(sut.uploadArtifact(name, path)).rejects.toThrow()
-  })
-
-  it('uploads artifact', async () => {
-    findMock.mockImplementation(async () => {
-      return {
-        directories: [],
-        files: ['file1', 'file2', 'file3', 'file4'],
-        searchPaths: ['searchPath1']
-      }
-    })
-
-    const name = 'artifact_name'
-    const path = 'artifact_path'
-
-    await sut.uploadArtifact(name, path, 90)
-
-    expect(MockedArtifactClient).toHaveBeenCalledTimes(1)
+    expect(await uploadResults('results', fixture.root, 0)).toBeUndefined()
+    expect(core.warning).toHaveBeenCalledWith(expect.stringContaining('409'))
+    expect(core.setFailed).not.toHaveBeenCalled()
   })
 })

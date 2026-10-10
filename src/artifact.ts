@@ -1,43 +1,47 @@
 import * as core from '@actions/core'
 import { DefaultArtifactClient } from '@actions/artifact'
 import type { UploadArtifactOptions } from '@actions/artifact'
-import { find } from './find.js'
+import * as glob from '@actions/glob'
+import * as path from './path.js'
 
-export async function uploadArtifact(
+/**
+ * Uploads everything under `directory`. Best effort: missing files and upload
+ * errors are warnings, since the test results already decide the outcome.
+ * Returns the artifact id, if one was uploaded.
+ */
+export async function uploadResults(
   name: string,
-  path: string,
-  retentionDays?: number
-): Promise<void> {
-  const findResult = await find(path)
-  if (findResult.files.length === 0) {
-    throw new Error(
-      `No files were found with the provided path: ${path}. No artifact will be uploaded.`
-    )
+  directory: string,
+  retentionDays: number
+): Promise<number | undefined> {
+  const globber = await glob.create(path.join(directory, '**'), {
+    matchDirectories: false
+  })
+  const files = await globber.glob()
+
+  if (files.length === 0) {
+    core.warning(`No test results in ${directory}; nothing to upload`)
+    return undefined
   }
 
-  const s = findResult.files.length === 1 ? '' : 's'
-  core.info(
-    `With the provided path, there will be ${findResult.files.length} file${s} uploaded`
-  )
-
-  const artifact = new DefaultArtifactClient()
-
   const options: UploadArtifactOptions = {}
-
-  if (retentionDays && retentionDays > 0) {
+  if (retentionDays > 0) {
     options.retentionDays = retentionDays
   }
 
-  const { id, size } = await artifact.uploadArtifact(
-    name,
-    findResult.files,
-    findResult.searchPaths[0], // TODO: Error if multiple search paths?
-    options
-  )
-
-  if (id === undefined || size === undefined || size <= 0) {
-    throw new Error(`An error was encountered while uploading ${name}.`)
-  } else {
-    core.info(`Artifact ${name} has been successfully uploaded!`)
+  try {
+    const { id } = await new DefaultArtifactClient().uploadArtifact(
+      name,
+      files,
+      directory,
+      options
+    )
+    core.info(`Uploaded ${files.length} file(s) as artifact ${name}`)
+    return id
+  } catch (error) {
+    core.warning(
+      `Failed to upload artifact ${name}: ${error instanceof Error ? error.message : String(error)}`
+    )
+    return undefined
   }
 }

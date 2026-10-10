@@ -1,50 +1,65 @@
-import { describe, it, expect } from 'vitest'
-import * as sut from '../src/find.js'
-import * as path from '../src/path.js'
+import { describe, it, expect, afterEach } from 'vitest'
+import { findFiles, resolvePattern } from '../src/find.js'
+import { createFixture } from './helpers/fixture.js'
 
-import * as posix from 'path/posix'
-import * as win32 from 'path/win32'
+let dispose: () => void = () => {}
 
-const solutionFolder = path.join(__dirname, './__solution__')
+describe('findFiles()', () => {
+  afterEach(() => dispose())
 
-describe('find()', () => {
-  it('finds directory', async () => {
-    const results = await sut.find(
-      path.join(solutionFolder, '**\\nanoFramework.TestFramework.*\\')
+  it('resolves relative patterns against the working directory', async () => {
+    const fixture = createFixture({
+      'a/bin/Release/NFUnitTest.dll': '',
+      'b/bin/Release/NFUnitTest.dll': '',
+      'b/bin/Debug/NFUnitTest.dll': ''
+    })
+    dispose = fixture.dispose
+
+    const files = await findFiles(
+      ['**/bin/Release/NFUnitTest.dll'],
+      fixture.root
     )
 
-    expect(results.directories.length).toBeGreaterThan(0)
-    expect(results.directories[0]).toContain('nanoFramework.TestFramework.')
-    expect(results.files.length).toBeGreaterThan(0)
-    expect(results.searchPaths.length).toBe(1)
-    expect(results.searchPaths[0]).toBe(solutionFolder)
+    expect(files.map(f => f.slice(fixture.root.length))).toEqual([
+      '/a/bin/Release/NFUnitTest.dll',
+      '/b/bin/Release/NFUnitTest.dll'
+    ])
   })
 
-  it('finds file', async () => {
-    const results = await sut.find(
-      path.join(
-        solutionFolder,
-        '**\\packages\\**\\nanoFramework.TestAdapter.dll'
-      )
+  it('applies negations', async () => {
+    const fixture = createFixture({
+      'a/bin/Release/NFUnitTest.dll': '',
+      'b/bin/Release/NFUnitTest.dll': ''
+    })
+    dispose = fixture.dispose
+
+    const files = await findFiles(
+      ['**/bin/Release/NFUnitTest.dll', '!b/**'],
+      fixture.root
     )
 
-    expect(results.directories.length).toBe(0)
-    expect(results.files.length).toBe(1)
-    expect(results.files[0]).toContain('nanoFramework.TestAdapter.dll')
-    expect(results.searchPaths.length).toBe(1)
-    expect(results.searchPaths[0]).toBe(solutionFolder)
+    expect(files).toHaveLength(1)
+    expect(files[0]).toMatch(/\/a\/bin\/Release\/NFUnitTest\.dll$/)
+  })
+
+  it('returns nothing for no patterns', async () => {
+    expect(await findFiles(['', '  '], '.')).toEqual([])
   })
 })
 
-describe('getSearchPath()', () => {
-  it.each([
-    ['/', ['/foo/', '/bar/'], posix],
-    ['~', ['~/foo/', '~/bar/'], posix],
-    ['~/foo', ['~/foo/bar/*', '~/foo/voo/two/*', '~/foo/mo/'], posix],
-    ['D:/temp', ['D:\\temp\\sub1', 'D:\\temp\\sub2'], win32]
-  ])(`returns common path '%s'`, (expected, searchPaths) => {
-    const result = sut.getSearchPath(searchPaths)
+describe('resolvePattern()', () => {
+  it('prefixes relative patterns', () => {
+    expect(resolvePattern('**\\bin\\x.dll', 'C:/repo')).toBe(
+      'C:/repo/**/bin/x.dll'
+    )
+  })
 
-    expect(result).toBe(expected)
+  it('keeps absolute patterns', () => {
+    expect(resolvePattern('D:\\a\\**\\x.dll', 'C:/repo')).toBe('D:/a/**/x.dll')
+    expect(resolvePattern('/opt/**/x.dll', '/repo')).toBe('/opt/**/x.dll')
+  })
+
+  it('keeps the negation prefix', () => {
+    expect(resolvePattern('!obj/**', '/repo')).toBe('!/repo/obj/**')
   })
 })

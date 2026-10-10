@@ -53,7 +53,7 @@ export default [
       sourceType: 'module',
 
       parserOptions: {
-        project: ['./.github/linters/tsconfig.json', './tsconfig.json']
+        project: ['./tsconfig.eslint.json']
       }
     },
 

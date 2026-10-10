@@ -1,295 +1,167 @@
-import { vi, describe, it, expect, beforeEach, type MockInstance } from 'vitest'
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import * as exec from '@actions/exec'
-import { Default, Inputs } from '../src/inputs.js'
-import * as path from '../src/path.js'
-import * as powershell from '../src/powershell.js'
+import * as tc from '@actions/tool-cache'
+import { join } from 'path'
 import * as sut from '../src/vstest.js'
-import * as find from '../src/find.js'
+import type { TestGroup } from '../src/plan.js'
+import { createFixture } from './helpers/fixture.js'
 
-vi.mock('@actions/exec', () => ({
-  exec: vi.fn().mockResolvedValue(undefined),
-  // Default to a non-zero exit so tests fall through to the glob fallbacks
-  // unless they opt into a vswhere result.
-  getExecOutput: vi
-    .fn()
-    .mockResolvedValue({ exitCode: 1, stdout: '', stderr: '' })
-}))
+vi.mock('@actions/core')
+vi.mock('@actions/exec')
+vi.mock('@actions/tool-cache')
 
-const SolutionFolder = path.join(__dirname, './__solution__')
+const group: TestGroup = {
+  adapterDirectory:
+    '/repo/packages/nanoFramework.TestFramework.3.0.80/lib/net48',
+  assemblies: ['/repo/A/bin/Release/NFUnitTest.dll'],
+  name: '1-A',
+  runSettings: '/repo/A/nano.runsettings'
+}
 
-let execMock: MockInstance<typeof exec.exec>
-let expandArchiveMock: MockInstance<typeof powershell.expandArchive>
-let findMock: MockInstance<typeof find.find>
-let invokeWebRequestMock: MockInstance<typeof powershell.invokeWebRequest>
-
-describe('downloadTestTools()', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-
-    expandArchiveMock = vi
-      .spyOn(powershell, 'expandArchive')
-      .mockImplementation(async () => {})
-    invokeWebRequestMock = vi
-      .spyOn(powershell, 'invokeWebRequest')
-      .mockImplementation(async () => {})
-  })
-
-  it('returns path to vstest.console.exe', async () => {
-    const vsTestPath = await sut.downloadTestTools()
-
-    expect(vsTestPath).toBeTruthy()
-    expect(invokeWebRequestMock).toHaveBeenCalledTimes(1)
-    expect(expandArchiveMock).toHaveBeenCalledTimes(1)
-  })
-})
-
-describe('getRunSettings()', () => {
-  it('finds test settings', async () => {
-    const inputs: Inputs = {
-      solutionFolder: SolutionFolder
-    }
-
-    const results = await sut.getRunSettings(inputs)
-
-    expect(results.length).toBe(1)
-  })
-
-  it('throws if `solutionFolder` is not supplied', async () => {
-    const inputs: Inputs = {
-      testAssemblies: Default.testAssemblies
-    }
-
-    await expect(sut.getRunSettings(inputs)).rejects.toThrow()
-  })
-})
-
-describe('getTestAdapters()', () => {
-  it('finds test adapters', async () => {
-    const inputs: Inputs = {
-      solutionFolder: SolutionFolder,
-      testAdapter: Default.testAdapter
-    }
-
-    const results = await sut.getTestAdapters(inputs)
-
-    expect(results.length).toBe(1)
-  })
-
-  it('throws if `solutionFolder` is not supplied', async () => {
-    const inputs: Inputs = {
-      testAdapter: Default.testAdapter
-    }
-
-    await expect(sut.getTestAdapters(inputs)).rejects.toThrow()
-  })
-
-  it('throws if `testAdapter` is not supplied', async () => {
-    const inputs: Inputs = {
-      solutionFolder: SolutionFolder
-    }
-
-    await expect(sut.getTestAdapters(inputs)).rejects.toThrow()
-  })
-})
+let dispose: () => void = () => {}
 
 describe('getTestArguments()', () => {
-  it('handles default values', () => {
-    expect(sut.getTestArguments({})).toBe('')
-  })
+  it('puts the generated arguments before other options', () => {
+    const args = sut.getTestArguments(group, '/results/1-A', ['/Blame'])
 
-  it.each([
-    [true, '/EnableCodeCoverage '],
-    [false, ''],
-    [undefined, '']
-  ])(`handles 'enableCodeCoverage' %s`, (test, expected) => {
-    expect(sut.getTestArguments({ enableCodeCoverage: test })).toBe(expected)
-  })
-
-  it.each([
-    ['x86', '/Platform:x86 '],
-    ['x64', '/Platform:x64 '],
-    ['ARM', '/Platform:ARM '],
-    [undefined, ''],
-    ['', '']
-  ])(`handles 'platform' %s`, (test, expected) => {
-    expect(sut.getTestArguments({ platform: test })).toBe(expected)
-  })
-
-  it.each([
-    [true, '/InIsolation '],
-    [false, ''],
-    [undefined, '']
-  ])(`handles 'runInIsolation' %s`, (test, expected) => {
-    expect(sut.getTestArguments({ runInIsolation: test })).toBe(expected)
-  })
-
-  it.each([
-    [true, '/Parallel '],
-    [false, ''],
-    [undefined, '']
-  ])(`handles 'runInParallel' %s`, (test, expected) => {
-    expect(sut.getTestArguments({ runInParallel: test })).toBe(expected)
-  })
-
-  it.each([
-    ['runsettings', '/Settings:runsettings '],
-    ['', ''],
-    [undefined, '']
-  ])(`handles 'runSettings' %s`, (test, expected) => {
-    expect(sut.getTestArguments({ runSettings: test })).toBe(expected)
-  })
-
-  it.each([
-    ['arg1', 'arg1'],
-    ['arg1 arg2', 'arg1 arg2'],
-    ['', ''],
-    [undefined, '']
-  ])(`handles 'otherConsoleOptions' %s`, (test, expected) => {
-    expect(sut.getTestArguments({ otherConsoleOptions: test })).toBe(expected)
+    expect(args).toEqual([
+      '/repo/A/bin/Release/NFUnitTest.dll',
+      '/TestAdapterPath:/repo/packages/nanoFramework.TestFramework.3.0.80/lib/net48',
+      '/Settings:/repo/A/nano.runsettings',
+      '/Logger:trx;LogFileName=1-A.trx',
+      '/ResultsDirectory:/results/1-A',
+      '/Blame'
+    ])
   })
 })
 
-describe('getTestAssemblies()', () => {
-  it('finds test assemblies', async () => {
-    const inputs: Inputs = {
-      solutionFolder: SolutionFolder,
-      testAssemblies: Default.testAssemblies
-    }
+describe('runTestGroup()', () => {
+  afterEach(() => dispose())
 
-    const results = await sut.getTestAssemblies(inputs)
+  it('reports the exit code and a written TRX', async () => {
+    const fixture = createFixture({ '1-A/1-A.trx': '<TestRun />' })
+    dispose = fixture.dispose
+    vi.mocked(exec.exec).mockResolvedValue(1)
 
-    expect(results.length).toBe(2)
+    const result = await sut.runTestGroup(
+      'vstest.console.exe',
+      group,
+      fixture.root,
+      []
+    )
+
+    expect(result).toEqual({ exitCode: 1, group, hasResults: true })
+    expect(vi.mocked(exec.exec).mock.calls[0][2]).toEqual({
+      ignoreReturnCode: true
+    })
   })
 
-  it('throws if `solutionFolder` is not supplied', async () => {
-    const inputs: Inputs = {
-      testAssemblies: Default.testAssemblies
-    }
+  it('reports a crash when no TRX is written', async () => {
+    const fixture = createFixture({})
+    dispose = fixture.dispose
+    vi.mocked(exec.exec).mockRejectedValue(new Error('spawn failed'))
 
-    await expect(sut.getTestAssemblies(inputs)).rejects.toThrow()
-  })
+    const result = await sut.runTestGroup(
+      'vstest.console.exe',
+      group,
+      fixture.root,
+      []
+    )
 
-  it('throws if `testAssemblies` is not supplied', async () => {
-    const inputs: Inputs = {
-      solutionFolder: SolutionFolder
-    }
-
-    await expect(sut.getTestAssemblies(inputs)).rejects.toThrow()
+    expect(result).toEqual({ exitCode: -1, group, hasResults: false })
   })
 })
 
 describe('getVsTestPath()', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
+  const programFiles = process.env['ProgramFiles(x86)']
 
-    findMock = vi.spyOn(find, 'find').mockImplementation(async () => ({
-      directories: [],
-      files: [],
-      searchPaths: []
-    }))
+  afterEach(() => {
+    process.env['ProgramFiles(x86)'] = programFiles
+    dispose()
   })
 
-  it('finds returns empty string', async () => {
-    findMock.mockImplementation(async () => {
-      return {
-        directories: [],
-        files: [],
-        searchPaths: []
-      }
-    })
+  function vsFixture(withVsTest: boolean): string {
+    const files: Record<string, string> = {
+      'Microsoft Visual Studio/Installer/vswhere.exe': ''
+    }
+    if (withVsTest) {
+      files[
+        'VS/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe'
+      ] = ''
+    }
+    const fixture = createFixture(files)
+    dispose = fixture.dispose
+    process.env['ProgramFiles(x86)'] = fixture.root
+    return fixture.root
+  }
 
-    const results = await sut.getVsTestPath()
-
-    expect(results).toBe('')
-  })
-
-  it('finds returns first path', async () => {
-    findMock.mockImplementation(async () => {
-      return {
-        directories: [],
-        files: ['file1', 'file2'],
-        searchPaths: ['searchPath1']
-      }
-    })
-
-    const results = await sut.getVsTestPath()
-
-    expect(results).toBe('file1')
-  })
-
-  it('searches the install path reported by vswhere', async () => {
-    const installPath =
-      'C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise'
-
+  it('returns vstest.console.exe from the newest install', async () => {
+    const root = vsFixture(true)
     vi.mocked(exec.getExecOutput).mockResolvedValue({
       exitCode: 0,
-      stdout: `${installPath}\n`,
+      stdout: `${join(root, 'VS')}\r\n`,
       stderr: ''
     })
-    findMock.mockImplementation(async () => ({
-      directories: [],
-      files: ['vstest.console.exe'],
-      searchPaths: []
-    }))
 
-    const results = await sut.getVsTestPath()
-
-    expect(results).toBe('vstest.console.exe')
-    expect(findMock).toHaveBeenCalledTimes(1)
-    expect(findMock).toHaveBeenCalledWith(expect.stringContaining(installPath))
+    expect(await sut.getVsTestPath()).toMatch(
+      /TestWindow\/vstest\.console\.exe$/
+    )
+    expect(vi.mocked(exec.getExecOutput).mock.calls[0][1]).toContain('-latest')
   })
 
-  it('falls back to the glob roots when vswhere finds nothing there', async () => {
+  it('returns empty when vswhere finds nothing', async () => {
+    vsFixture(false)
     vi.mocked(exec.getExecOutput).mockResolvedValue({
       exitCode: 0,
-      stdout: 'C:\\Some\\Install\n',
+      stdout: '',
       stderr: ''
     })
-    findMock
-      .mockImplementationOnce(async () => ({
-        directories: [],
-        files: [],
-        searchPaths: []
-      }))
-      .mockImplementation(async () => ({
-        directories: [],
-        files: ['fallback.exe'],
-        searchPaths: []
-      }))
 
-    const results = await sut.getVsTestPath()
-
-    expect(results).toBe('fallback.exe')
+    expect(await sut.getVsTestPath()).toBe('')
   })
 
-  it('searches known versions newest first when vswhere is unavailable', async () => {
-    vi.mocked(exec.getExecOutput).mockRejectedValue(new Error('ENOENT'))
+  it('returns empty without vswhere', async () => {
+    process.env['ProgramFiles(x86)'] = '/nonexistent'
 
-    await sut.getVsTestPath()
-
-    const patterns = findMock.mock.calls.map(call => call[0])
-    expect(patterns[0]).toContain('\\18\\')
-    expect(patterns[1]).toContain('\\2022\\')
-    expect(patterns[2]).toContain('\\2019\\')
-    expect(patterns).toHaveLength(4)
+    expect(await sut.getVsTestPath()).toBe('')
   })
 })
 
-describe('runTests()', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
+describe('downloadTestTools()', () => {
+  beforeEach(() => vi.clearAllMocks())
+  afterEach(() => dispose())
 
-    execMock = vi.mocked(exec.exec)
+  function testPlatform(): string {
+    const fixture = createFixture({
+      'tools/net462/Common7/IDE/Extensions/TestPlatform/vstest.console.exe': ''
+    })
+    dispose = fixture.dispose
+    return fixture.root
+  }
+
+  it('reuses the tool cache', async () => {
+    vi.mocked(tc.find).mockReturnValue(testPlatform())
+
+    expect(await sut.downloadTestTools()).toMatch(/vstest\.console\.exe$/)
+    expect(tc.downloadTool).not.toHaveBeenCalled()
   })
 
-  it('executes vstest.console.exe', async () => {
-    const args = 'args'
-    const testAdapterPath = 'testAdapter'
-    const testAssemblies = ['testAssembly1', 'testAssembly2']
-    const vsTestPath = 'vsTestPath'
+  it('downloads and caches when missing', async () => {
+    const root = testPlatform()
+    vi.mocked(tc.find).mockReturnValue('')
+    vi.mocked(tc.downloadTool).mockResolvedValue('/tmp/tp.zip')
+    vi.mocked(tc.extractZip).mockResolvedValue('/tmp/tp')
+    vi.mocked(tc.cacheDir).mockResolvedValue(root)
 
-    await sut.runTests(vsTestPath, testAssemblies, testAdapterPath, args)
+    expect(await sut.downloadTestTools()).toMatch(/vstest\.console\.exe$/)
+    expect(vi.mocked(tc.downloadTool).mock.calls[0][0]).toContain(
+      sut.TestPlatformVersion
+    )
+  })
 
-    expect(execMock).toHaveBeenCalledTimes(1)
+  it('throws when the package layout changed', async () => {
+    vi.mocked(tc.find).mockReturnValue('/nonexistent')
+
+    await expect(sut.downloadTestTools()).rejects.toThrow(/not found/)
   })
 })

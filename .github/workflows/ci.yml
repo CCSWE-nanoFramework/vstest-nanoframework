@@ -11,10 +11,15 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test-typescript:
     name: TypeScript Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout
@@ -51,41 +56,84 @@ jobs:
   test-action:
     name: GitHub Actions Test
     runs-on: windows-latest
-    env:
-      GITHUB_TOKEN: ${{ github.token }}
-      SOLUTION_FOLDER: './solution/'
-      SOLUTION: 'VsTestAction.sln'
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
-        id: checkout
         uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
 
       - name: Setup nanoFramework
-        uses: CCSWE-nanoFramework/actions-nanoframework/setup-nanoframework@master
+        uses: CCSWE-nanoFramework/actions-nanoframework/.github/actions/setup-nanoframework@master
 
       - name: Build solution
-        uses: CCSWE-nanoFramework/actions-nanoframework/build-nanoframework@master
+        uses: CCSWE-nanoFramework/actions-nanoframework/.github/actions/build-nanoframework@master
         with:
-          solution: ${{ env.SOLUTION_FOLDER }}${{ env.SOLUTION }}
+          solution: solution/VsTestAction.sln
 
+      # Defaults otherwise: NFUnitTest1 uses its own nano.runsettings and
+      # NFUnitTest2 falls back to the package template, so two groups run.
       - name: Test Local Action
         id: test-action
         uses: ./
         with:
-          solutionFolder: ${{ env.SOLUTION_FOLDER }}
-          runSettings: ${{ env.SOLUTION_FOLDER }}NFUnitTest1/nano.runsettings
-          artifactName: 'non-default-artifact-name'
-          artifactRetentionDays: 1
+          working-directory: solution
+          artifact-name: vstest-results-default
+          artifact-retention-days: 1
+
+      - name: Check results
+        shell: bash
+        env:
+          RESULTS: ${{ steps.test-action.outputs.results-directory }}
+        run: |
+          count="$(find "$RESULTS" -name '*.trx' | wc -l)"
+          if [ "$count" -ne 2 ]; then
+            echo "::error::Expected 2 TRX files in $RESULTS, found $count"
+            exit 1
+          fi
+
+  test-action-failure:
+    name: GitHub Actions Failure Test
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup nanoFramework
+        uses: CCSWE-nanoFramework/actions-nanoframework/.github/actions/setup-nanoframework@master
+
+      - name: Build solution
+        uses: CCSWE-nanoFramework/actions-nanoframework/.github/actions/build-nanoframework@master
+        with:
+          solution: solution/VsTestActionFailing.sln
+
+      - name: Test Local Action
+        id: test-action
+        continue-on-error: true
+        uses: ./
+        with:
+          working-directory: solution
+          artifact-name: vstest-results-failure
+          artifact-retention-days: 1
+
+      - name: Check the action failed
+        shell: bash
+        env:
+          OUTCOME: ${{ steps.test-action.outcome }}
+        run: |
+          if [ "$OUTCOME" != failure ]; then
+            echo "::error::Expected the action to fail, outcome was $OUTCOME"
+            exit 1
+          fi
 
   dependabot-merge:
-    needs: [test-typescript, test-action]
+    needs: [test-typescript, test-action, test-action-failure]
     if:
       github.event_name == 'pull_request' &&
       github.event.pull_request.user.login == 'dependabot[bot]'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: read
       pull-requests: read
@@ -120,6 +168,7 @@ jobs:
       github.event_name == 'push' && github.ref == format('refs/heads/{0}',
       github.event.repository.default_branch)
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: read
     steps:

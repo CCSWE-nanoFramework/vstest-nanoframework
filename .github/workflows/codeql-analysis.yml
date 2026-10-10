@@ -11,8 +11,6 @@ on:
     - cron: '31 7 * * 3'
 
 permissions:
-  actions: read
-  checks: write
   contents: read
   security-events: write
 
@@ -20,12 +18,14 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     strategy:
       fail-fast: false
       matrix:
         language:
-          - TypeScript
+          - actions
+          - javascript-typescript
 
     steps:
       - name: Checkout
@@ -37,11 +37,10 @@ jobs:
         uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
-          source-root: src
-
-      - name: Autobuild
-        id: autobuild
-        uses: github/codeql-action/autobuild@v4
+          config: |
+            paths-ignore:
+              - dist
+              - __tests__
 
       - name: Perform CodeQL Analysis
         id: analyze

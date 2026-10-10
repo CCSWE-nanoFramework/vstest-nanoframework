@@ -1,103 +1,43 @@
-import * as core from '@actions/core'
 import * as glob from '@actions/glob'
-import { stat } from 'fs'
-import { promisify } from 'util'
-import * as posixPath from 'path/posix'
 import * as path from './path.js'
 
-const statAsync = promisify(stat)
-
-const defaultGlobOptions: glob.GlobOptions = {
+const globOptions: glob.GlobOptions = {
   followSymbolicLinks: true,
-  implicitDescendants: true,
+  implicitDescendants: false,
+  matchDirectories: false,
   omitBrokenSymbolicLinks: true
 }
 
-export interface FindResult {
-  directories: string[]
-  files: string[]
-  searchPaths: string[]
-}
-
-export async function find(pattern: string): Promise<FindResult> {
-  const result: FindResult = {
-    directories: [],
-    files: [],
-    searchPaths: []
-  }
-
-  pattern = path.normalize(pattern)
-
-  const globber = await glob.create(pattern, defaultGlobOptions)
-  const globResults: string[] = await globber.glob()
-
-  for (const globResult of globResults) {
-    const stats = await statAsync(globResult)
-    if (stats.isDirectory()) {
-      result.directories.push(globResult)
-    } else {
-      result.files.push(globResult)
-    }
-  }
-
-  result.searchPaths = globber.getSearchPaths()
-
-  return result
-}
-
 /**
- * If multiple search paths are specified, the least common ancestor (LCA) of the search paths is used as
- * the delimiter to control the directory structure. This function returns the LCA when given an array of
- * search paths
- *
- * Example 1: The patterns `/foo/` and `/bar/` returns `/`
- *
- * Example 2: The patterns `~/foo/bar/*` and `~/foo/voo/two/*` and `~/foo/mo/` returns `~/foo`
+ * Returns the files matching the patterns. Relative patterns are resolved
+ * against `workingDirectory`; absolute patterns and `!` negations are kept.
  */
-export function getSearchPath(searchPaths: string[]): string {
-  const commonPaths = new Array<string>()
-  const splitPaths = new Array<string[]>()
-  let smallestPathLength = Number.MAX_SAFE_INTEGER
+export async function findFiles(
+  patterns: string[],
+  workingDirectory: string
+): Promise<string[]> {
+  const resolved = patterns
+    .map(p => p.trim())
+    .filter(p => p.length > 0)
+    .map(p => resolvePattern(p, workingDirectory))
 
-  // split each of the search paths using the platform specific separator
-  for (const searchPath of searchPaths) {
-    core.debug(`Using search path ${searchPath}`)
-
-    const splitSearchPath = posixPath
-      .normalize(searchPath.replace(/\\/g, '/'))
-      .split('/')
-
-    // keep track of the smallest path length so that we don't accidentally later go out of bounds
-    smallestPathLength = Math.min(smallestPathLength, splitSearchPath.length)
-    splitPaths.push(splitSearchPath)
+  if (resolved.length === 0) {
+    return []
   }
 
-  // on Unix-like file systems, the file separator exists at the beginning of the file path, make sure to preserve it
-  if (searchPaths.some(searchPath => searchPath.startsWith(path.sep))) {
-    commonPaths.push(path.sep)
-  }
+  const globber = await glob.create(resolved.join('\n'), globOptions)
+  const files = await globber.glob()
+  return files.sort((a, b) => a.localeCompare(b))
+}
 
-  let splitIndex = 0
-  // function to check if the paths are the same at a specific index
-  function isPathTheSame(): boolean {
-    const compare = splitPaths[0][splitIndex]
-    for (let i = 1; i < splitPaths.length; i++) {
-      if (compare !== splitPaths[i][splitIndex]) {
-        // a non-common index has been reached
-        return false
-      }
-    }
-    return true
-  }
-
-  // loop over all the search paths until there is a non-common ancestor or we go out of bounds
-  while (splitIndex < smallestPathLength) {
-    if (!isPathTheSame()) {
-      break
-    }
-    // if all are the same, add to the end result & increment the index
-    commonPaths.push(splitPaths[0][splitIndex])
-    splitIndex++
-  }
-  return posixPath.join(...commonPaths)
+export function resolvePattern(
+  pattern: string,
+  workingDirectory: string
+): string {
+  const negate = pattern.startsWith('!')
+  const value = negate ? pattern.slice(1) : pattern
+  const resolved = path.isAbsolute(value)
+    ? path.normalize(value)
+    : path.join(workingDirectory, value)
+  return negate ? `!${resolved}` : resolved
 }
