@@ -63,10 +63,10 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Setup nanoFramework
-        uses: ccswe-apps/actions/.github/actions/setup-nanoframework@nanoframework
+        uses: ccswe-apps/actions/.github/actions/setup-nanoframework@master
 
       - name: Build solution
-        uses: ccswe-apps/actions/.github/actions/build-nanoframework@nanoframework
+        uses: ccswe-apps/actions/.github/actions/build-nanoframework@master
         with:
           solution: solution/VsTestAction.sln
 
@@ -101,10 +101,10 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Setup nanoFramework
-        uses: ccswe-apps/actions/.github/actions/setup-nanoframework@nanoframework
+        uses: ccswe-apps/actions/.github/actions/setup-nanoframework@master
 
       - name: Build solution
-        uses: ccswe-apps/actions/.github/actions/build-nanoframework@nanoframework
+        uses: ccswe-apps/actions/.github/actions/build-nanoframework@master
         with:
           solution: solution/VsTestActionFailing.sln
 
