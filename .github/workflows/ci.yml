@@ -10,48 +10,19 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  test-typescript:
-    name: TypeScript Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout
-        id: checkout
-        uses: actions/checkout@v7
-
-      - name: Check Node Version Files
-        id: node-version-files
-        run: cmp .node-version .nvmrc
-
-      - name: Setup Node.js
-        id: setup-node
-        uses: actions/setup-node@v7
-        with:
-          node-version-file: .node-version
-          cache: npm
-
-      - name: Install Dependencies
-        id: npm-ci
-        run: npm ci
-
-      - name: Check Format
-        id: npm-format-check
-        run: npm run format:check
-
-      - name: Lint
-        id: npm-lint
-        run: npm run lint
-
-      - name: Test
-        id: npm-ci-test
-        run: npm run ci-test
+  # Keep the id: the required check is `pipeline / build` (format, lint, test, build, dist/ check).
+  pipeline:
+    uses: ccswe-apps/actions/.github/workflows/npm-build-action.yml@npm-workflows
+    secrets:
+      AUTOMATION_APP_ID: ${{ secrets.AUTOMATION_APP_ID }}
+      AUTOMATION_APP_KEY: ${{ secrets.AUTOMATION_APP_KEY }}
 
   test-action:
     name: GitHub Actions Test
@@ -132,13 +103,3 @@ jobs:
             echo "::error::The action failed without writing test results"
             exit 1
           fi
-
-  dependabot:
-    needs: [test-typescript, test-action, test-action-failure]
-    permissions:
-      contents: read
-      pull-requests: read
-    uses: ccswe-apps/actions/.github/workflows/dependabot.yml@master
-    secrets:
-      AUTOMATION_APP_ID: ${{ secrets.AUTOMATION_APP_ID }}
-      AUTOMATION_APP_KEY: ${{ secrets.AUTOMATION_APP_KEY }}
