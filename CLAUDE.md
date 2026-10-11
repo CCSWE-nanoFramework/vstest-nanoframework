@@ -18,15 +18,14 @@ uploads the `.trx` results as an artifact.
 ## Commands
 
 ```bash
-npm run bundle        # Format code + build distribution bundle (run before committing)
-npm run package       # Build TypeScript → dist/index.js via @vercel/ncc
-npm run package:watch # Watch mode for package building
+npm run build         # Build TypeScript → dist/index.js via @vercel/ncc (commit dist/)
+npm run build:watch   # Watch mode for the build
 npm run lint          # Run ESLint
-npm run format:write  # Format code with Prettier
+npm run format        # Format code with Prettier
 npm run format:check  # Check formatting without writing
-npm run test          # Run Vitest with coverage
-npm run ci-test       # Run Vitest without coverage (used by CI)
-npm run all           # Full pipeline: format → lint → test → package
+npm run test          # Run Vitest (used by CI)
+npm run test:coverage # Run Vitest with coverage
+npm run all           # Full pipeline: format → lint → test → build
 ```
 
 To run a single test file:
@@ -56,11 +55,11 @@ npx vitest run __tests__/path/to/test.test.ts
 Unit tests build temporary fixture trees with `__tests__/helpers/fixture.ts`.
 
 **Distribution**: The `dist/` directory contains the bundled single-file output
-(`dist/index.js`) checked into git. Always run `npm run bundle` before
-committing changes to source files — the `check-dist.yml` workflow will fail the
-PR if `dist/` is out of sync. `rebuild-dist.yml` rebuilds and commits `dist/`
-automatically on Dependabot PRs and on demand (`workflow_dispatch`) for any
-other branch.
+(`dist/index.js`) checked into git. Always run `npm run build` before committing
+changes to source files — `pipeline / build` (ccswe-apps/actions
+`npm-build-action.yml`) fails the PR if `dist/` is out of sync.
+`rebuild-dist.yml` rebuilds and commits `dist/` automatically on Dependabot PRs
+and on demand (`workflow_dispatch`) for any other branch.
 
 **Releases**: see README → Releasing. `v1` is frozen at v1.0.18.
 

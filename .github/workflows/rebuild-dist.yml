@@ -41,14 +41,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version-file: .node-version
+          node-version-file: .nvmrc
           cache: npm
 
       - name: Install Dependencies
         run: npm ci
 
       - name: Build dist/ Directory
-        run: npm run bundle
+        run: npm run build
 
       - name: Check for Changes
         id: changes

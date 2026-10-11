@@ -87,7 +87,7 @@ v1 is frozen at v1.0.18 (critical fixes only).
 Releases are tag-driven:
 
 1. Make sure `master` is green and `dist/` is committed and up to date
-   (`npm run bundle` produces no diff — CI enforces this).
+   (`npm run build` produces no diff — CI enforces this).
 2. Create and push a `vMAJOR.MINOR.PATCH` tag from `master`:
 
    ```bash
@@ -95,23 +95,24 @@ Releases are tag-driven:
    git push origin vX.Y.Z
    ```
 
-The [`Release`](.github/workflows/release.yml) workflow re-runs
-format/lint/test, re-verifies `dist/`, creates a GitHub Release with generated
-notes, and moves the major tag (`vN`) to the new release. A tag with a hyphen
-(e.g. `v2.1.0-beta.1`) is a pre-release and doesn't move the major tag.
+The [`Release`](.github/workflows/release.yml) workflow (ccswe-apps/actions
+`npm-release-action.yml`) re-runs format/lint/test, re-verifies `dist/`, creates
+a GitHub Release with generated notes, and moves the major tag (`vN`) to the new
+release. A tag with a hyphen (e.g. `v2.1.0-beta.1`) is a pre-release and doesn't
+move the major tag.
 
 Runtime dependency fixes (including Dependabot security updates) are bundled
 into `dist/`, so they only reach consumers once released.
 
 To point a major tag at another release by hand (e.g. a rollback), run the
-[`Update Main Version`](.github/workflows/update-main-version.yml) workflow.
+[`Move major tag`](.github/workflows/move-major-tag.yml) workflow.
 
 ### v1 fixes
 
 1. Branch `release/v1` from `v1.0.18` and add `release/**` to the branch filters
-   in `ci.yml` and `check-dist.yml`.
-2. Fix, bundle, and tag `v1.0.19` on that branch. `release.yml` requires tags on
-   `master`, so relax that check on the branch.
+   in `ci.yml`.
+2. Fix, build, and tag `v1.0.19` on that branch. The release workflow requires
+   tags on `master`, so its run fails for this tag; release by hand instead.
 3. Create the release with
    `gh release create v1.0.19 --generate-notes --notes-start-tag v1.0.18 --latest=false`
    so v2 stays "Latest".
