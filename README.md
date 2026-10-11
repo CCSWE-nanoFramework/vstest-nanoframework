@@ -9,14 +9,14 @@ with VSTest. Results are shown in the log and uploaded as `.trx` files.
 
 Restore and build your solution (Release) before running this action, for
 example with
-[actions-nanoframework](https://github.com/CCSWE-nanoFramework/actions-nanoframework):
+[actions-nanoframework](https://github.com/ccswe-nanoframework/actions-nanoframework):
 
 ```yaml
 - uses: actions/checkout@v7
 
-- uses: CCSWE-nanoFramework/actions-nanoframework/.github/actions/setup-nanoframework@master
+- uses: ccswe-nanoframework/actions-nanoframework/.github/actions/setup-nanoframework@master
 
-- uses: CCSWE-nanoFramework/actions-nanoframework/.github/actions/build-nanoframework@master
+- uses: ccswe-nanoframework/actions-nanoframework/.github/actions/build-nanoframework@master
   with:
     solution: MySolution.sln
 ```
@@ -59,7 +59,7 @@ not a failure.
 ## Example
 
 ```yaml
-- uses: CCSWE-nanoFramework/vstest-nanoframework@v2
+- uses: ccswe-nanoframework/vstest-nanoframework@v2
   with:
     working-directory: src
     artifact-retention-days: 7
