@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   release:
-    uses: ccswe-apps/actions/.github/workflows/npm-release-action.yml@npm-workflows
+    uses: ccswe-apps/actions/.github/workflows/npm-release-action.yml@master
     secrets:
       AUTOMATION_APP_ID: ${{ secrets.AUTOMATION_APP_ID }}
       AUTOMATION_APP_KEY: ${{ secrets.AUTOMATION_APP_KEY }}

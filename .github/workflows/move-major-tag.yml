@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   move:
-    uses: ccswe-apps/actions/.github/workflows/move-major-tag.yml@npm-workflows
+    uses: ccswe-apps/actions/.github/workflows/move-major-tag.yml@master
     with:
       target: ${{ inputs.target }}
       major: ${{ inputs.major }}
