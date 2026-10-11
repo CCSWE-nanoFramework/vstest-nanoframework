@@ -5,13 +5,13 @@
   "author": "CCSWE",
   "private": true,
   "type": "module",
-  "homepage": "https://github.com/CCSWE-nanoFramework/vstest-nanoframework",
+  "homepage": "https://github.com/ccswe-nanoframework/vstest-nanoframework",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CCSWE-nanoFramework/vstest-nanoframework.git"
+    "url": "git+https://github.com/ccswe-nanoframework/vstest-nanoframework.git"
   },
   "bugs": {
-    "url": "https://github.com/CCSWE-nanoFramework/vstest-nanoframework/issues"
+    "url": "https://github.com/ccswe-nanoframework/vstest-nanoframework/issues"
   },
   "keywords": [
     "actions",
