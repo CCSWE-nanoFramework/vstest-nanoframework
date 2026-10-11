@@ -8,15 +8,15 @@ with VSTest. Results are shown in the log and uploaded as `.trx` files.
 ## Prerequisites
 
 Restore and build your solution (Release) before running this action, for
-example with
-[actions-nanoframework](https://github.com/ccswe-nanoframework/actions-nanoframework):
+example with the [ccswe-apps/actions](https://github.com/ccswe-apps/actions)
+composites:
 
 ```yaml
 - uses: actions/checkout@v7
 
-- uses: ccswe-nanoframework/actions-nanoframework/.github/actions/setup-nanoframework@master
+- uses: ccswe-apps/actions/.github/actions/setup-nanoframework@master
 
-- uses: ccswe-nanoframework/actions-nanoframework/.github/actions/build-nanoframework@master
+- uses: ccswe-apps/actions/.github/actions/build-nanoframework@master
   with:
     solution: MySolution.sln
 ```
